@@ -4,973 +4,1028 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Genesis Automation — Inspiring Innovations</title>
-<meta name="description" content="Genesis Automation — luxury home technology, Bhubaneswar, Odisha. 15+ years of industrial-grade engineering meets everyday luxury living." />
+<meta name="description" content="Genesis Automation — luxury home automation in Bhubaneswar, Odisha. 15+ years of industrial-grade engineering meets everyday luxury living." />
 
-<!-- Tailwind CDN -->
+<!-- Tailwind CSS (CDN) -->
 <script src="https://cdn.tailwindcss.com"></script>
 
-<!-- Babel Standalone (in-browser JSX/ES module transform) -->
-<script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
-
-<!-- Import map: React / ReactDOM / lucide-react served as ES modules -->
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@18.2.0",
-    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-    "lucide-react": "https://esm.sh/lucide-react@0.383.0?external=react"
-  }
-}
-</script>
+<!-- Lucide Icons (CDN) -->
+<script src="https://unpkg.com/lucide@latest"></script>
 
 <style>
   html { scroll-behavior: smooth; }
-  body { margin: 0; background: #0b0b0b; }
+  body {
+    margin: 0;
+    background: #0b0b0b;
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+  }
+  ::selection { background: rgba(0,123,255,0.3); color: #fff; }
+
+  /* ---- utility glows ---- */
+  .glow-blue   { box-shadow: 0 0 0 1px rgba(0,123,255,0.25), 0 0 40px -10px rgba(0,123,255,0.55); }
+  .glow-orange { box-shadow: 0 0 0 1px rgba(230,81,0,0.25), 0 0 40px -10px rgba(230,81,0,0.55); }
+  .text-balance { text-wrap: balance; }
+
+  /* ---- reveal on scroll ---- */
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.9s ease, transform 0.9s ease; }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+
+  /* ---- marquee ---- */
+  @keyframes marquee-left  { 0% { transform: translateX(0); }    100% { transform: translateX(-50%); } }
+  @keyframes marquee-right { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
+  .marquee-left  { animation: marquee-left 34s linear infinite; }
+  .marquee-right { animation: marquee-right 40s linear infinite; }
+  .marquee-track:hover .marquee-left,
+  .marquee-track:hover .marquee-right { animation-play-state: paused; }
+
+  /* ---- pulsing call button ---- */
+  @keyframes pulse-ring {
+    0%   { box-shadow: 0 0 0 0 rgba(0,123,255,0.55); }
+    70%  { box-shadow: 0 0 0 18px rgba(0,123,255,0); }
+    100% { box-shadow: 0 0 0 0 rgba(0,123,255,0); }
+  }
+  .pulse-call { animation: pulse-ring 2.2s cubic-bezier(0.4,0,0.6,1) infinite; }
+
+  @keyframes ripple-wa {
+    0%   { box-shadow: 0 0 0 0 rgba(230,81,0,0.5); }
+    70%  { box-shadow: 0 0 0 18px rgba(230,81,0,0); }
+    100% { box-shadow: 0 0 0 0 rgba(230,81,0,0); }
+  }
+  .ripple-wa { animation: ripple-wa 2.2s cubic-bezier(0.4,0,0.6,1) infinite; animation-delay: 1.1s; }
+
+  @keyframes float-glow {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .float-glow { animation: float-glow 6s ease-in-out infinite; }
+
+  /* ---- modal ---- */
+  .modal-backdrop {
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .modal-backdrop.open { opacity: 1; pointer-events: auto; }
+  .modal-card {
+    transform: scale(0.94) translateY(16px);
+    transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+  }
+  .modal-backdrop.open .modal-card { transform: scale(1) translateY(0); }
+
+  /* scrollbar (webkit) */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #0b0b0b; }
+  ::-webkit-scrollbar-thumb { background: #262626; border-radius: 8px; }
 </style>
 </head>
-<body>
-<div id="root"></div>
-
-<script type="text/babel" data-type="module" data-presets="react">
-import React, { useState, useEffect, useRef } from "react";
-import ReactDOM from "react-dom/client";
-import {
-  Menu,
-  X,
-  Phone,
-  ArrowRight,
-  ArrowUpRight,
-  Lightbulb,
-  Wind,
-  Blinds,
-  Layers,
-  KeyRound,
-  Video,
-  DoorClosed,
-  BellRing,
-  Cable,
-  Waves,
-  Clapperboard,
-  Speaker,
-  MonitorPlay,
-  CheckCircle2,
-  XCircle,
-  HeartHandshake,
-  Baby,
-  Building2,
-  Hotel,
-  Home,
-  Store,
-  MapPin,
-  Mail,
-  Globe,
-  ChevronRight,
-  ChevronLeft,
-  Sparkles,
-  ShieldCheck,
-  Gauge,
-} from "lucide-react";
-
-/* ---------------------------------------------------------------------- */
-/*  GENESIS AUTOMATION — single-page luxury experience                    */
-/*  Palette: void #0b0b0b · signal blue #007BFF · ember orange #E65100    */
-/* ---------------------------------------------------------------------- */
-
-const HUBS = [
-  {
-    id: "ambiance",
-    label: "Ambiance",
-    index: "01",
-    icon: Lightbulb,
-    accent: "blue",
-    blurb: "The air, the light, the mood — tuned to the hour of your day.",
-    items: [
-      { icon: Lightbulb, name: "Smart Lighting" },
-      { icon: Wind, name: "HVAC Control" },
-      { icon: Blinds, name: "Motorized Curtains" },
-      { icon: Layers, name: "Smart Glass" },
-    ],
-  },
-  {
-    id: "security",
-    label: "Security & Access",
-    index: "02",
-    icon: KeyRound,
-    accent: "orange",
-    blurb: "Every entry, every alert, watched without ever feeling watched.",
-    items: [
-      { icon: KeyRound, name: "Smart Locks" },
-      { icon: Video, name: "IP Video Door Phones" },
-      { icon: DoorClosed, name: "Motorized Gates" },
-      { icon: BellRing, name: "Burglar Alarms" },
-    ],
-  },
-  {
-    id: "infrastructure",
-    label: "Infrastructure",
-    index: "03",
-    icon: Cable,
-    accent: "blue",
-    blurb: "The unseen backbone — industrial-grade, wherever it needs to be.",
-    items: [
-      { icon: Cable, name: "Wired Automation" },
-      { icon: Waves, name: "Wireless Automation" },
-      { icon: Gauge, name: "Wireless Water Level Controllers" },
-    ],
-  },
-  {
-    id: "entertainment",
-    label: "Entertainment & Work",
-    index: "04",
-    icon: Clapperboard,
-    accent: "orange",
-    blurb: "A room that performs for a film, and disappears for a meeting.",
-    items: [
-      { icon: Clapperboard, name: "Home Cinema" },
-      { icon: Speaker, name: "Multi-Zone Audio" },
-      { icon: MonitorPlay, name: "Video Conferencing" },
-    ],
-  },
-];
-
-const WIRED_BRANDS = [
-  { name: "Schneider", tag: "Electric Infrastructure" },
-  { name: "Havells", tag: "Power & Switching" },
-  { name: "Legrand", tag: "Wiring Devices" },
-  { name: "ABB", tag: "Industrial Automation" },
-  { name: "Ekinex", tag: "KNX Design Systems" },
-];
-
-const WIRELESS_BRANDS = [
-  { name: "JR", tag: "Loft Glass & Metal Series" },
-  { name: "Smart Node", tag: "Acrylic & Glass Finish" },
-];
-
-const STRESS = [
-  "Forgetting lights, locks, and gates every time you leave",
-  "One remote per appliance, none of them talking to each other",
-  "Energy bills with no visibility into where it's spent",
-  "Security that only alerts you after something's gone wrong",
-];
-
-const PEACE = [
-  "One home, one logic — everything arrives at 'away' together",
-  "A single interface for light, air, sound and access",
-  "Industrial-grade energy metering, tuned room by room",
-  "Access and alerts that reach you before there's a problem",
-];
-
-const TRUST_LOGOS = [
-  "Indian Railways",
-  "Coca-Cola",
-  "Aditya Birla",
-  "Utkal Alumina",
-  "DLF",
-  "SMS Group",
-  "Modicare Ariana",
-  "Hotel Imperial",
-  "Rotary Club",
-];
-
-const NAV_LINKS = [
-  { label: "Ecosystem", href: "#ecosystem" },
-  { label: "The Hardware Vault", href: "#vault" },
-  { label: "Industrial Core", href: "#core" },
-  { label: "Trust Wall", href: "#trust" },
-  { label: "Contact", href: "#contact" },
-];
-
-const PROPERTY_TYPES = [
-  { label: "Villa", icon: Home },
-  { label: "Luxury Apartment", icon: Building2 },
-  { label: "Commercial Space", icon: Store },
-  { label: "Hotel / Hospitality", icon: Hotel },
-];
-
-const INTERESTS = [
-  { label: "Full Automation", icon: Sparkles },
-  { label: "Home Theater", icon: Clapperboard },
-  { label: "Smart Security", icon: ShieldCheck },
-  { label: "Energy Audit", icon: Gauge },
-];
-
-/* ---------------------------------------------------------------------- */
-
-function GenesisMark({ size = 36 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" aria-hidden="true">
-      <polygon
-        points="24,3 44,15 44,33 24,45 4,33 4,15"
-        stroke="#007BFF"
-        strokeWidth="1.2"
-        fill="none"
-        opacity="0.55"
-      />
-      <polygon points="24,11 37,18.5 37,29.5 24,37 11,29.5 11,18.5" fill="#0b0b0b" stroke="#E65100" strokeWidth="1.2" opacity="0.85" />
-      <circle cx="24" cy="24" r="4.5" fill="#007BFF" opacity="0.9" />
-    </svg>
-  );
-}
-
-function Reveal({ children, className = "", delay = 0 }) {
-  const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          obs.disconnect();
-        }
-      },
-      { threshold: 0.15 }
-    );
-    obs.observe(node);
-    return () => obs.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      className={`transition-all duration-1000 ease-out ${
-        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-      } ${className}`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
-      {children}
+<body class="antialiased">
+<!-- ============================= HEADER ============================= -->
+<header id="site-header" class="fixed top-0 left-0 right-0 z-50 border-b border-transparent transition-all duration-500">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between h-20">
+    <div class="flex items-center gap-3">
+      <img src="data:image/png;base64,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" alt="Genesis Automation" class="h-10 w-10 object-contain" />
+      <div class="leading-tight">
+        <p class="text-[13px] tracking-[0.28em] font-semibold text-white">GENESIS AUTOMATION</p>
+        <p class="text-[10px] tracking-[0.2em] text-white/40 mt-0.5">INSPIRING INNOVATIONS</p>
+      </div>
     </div>
-  );
-}
 
-function GenesisAutomation() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [activeHub, setActiveHub] = useState(0);
-  const [vaultTab, setVaultTab] = useState("wired");
-  const [scrolled, setScrolled] = useState(false);
+    <nav class="hidden lg:flex items-center gap-10">
+      <a href="#ecosystem" class="nav-link text-[13px] tracking-wide text-white/60 hover:text-white transition-colors duration-300 relative group">
+        Ecosystem
+        <span class="absolute -bottom-1 left-0 w-0 h-px bg-[#007BFF] transition-all duration-300 group-hover:w-full"></span>
+      </a>
+      <a href="#vault" class="nav-link text-[13px] tracking-wide text-white/60 hover:text-white transition-colors duration-300 relative group">
+        The Hardware Vault
+        <span class="absolute -bottom-1 left-0 w-0 h-px bg-[#007BFF] transition-all duration-300 group-hover:w-full"></span>
+      </a>
+      <a href="#core" class="nav-link text-[13px] tracking-wide text-white/60 hover:text-white transition-colors duration-300 relative group">
+        Industrial Core
+        <span class="absolute -bottom-1 left-0 w-0 h-px bg-[#007BFF] transition-all duration-300 group-hover:w-full"></span>
+      </a>
+      <a href="#trust" class="nav-link text-[13px] tracking-wide text-white/60 hover:text-white transition-colors duration-300 relative group">
+        Trust Wall
+        <span class="absolute -bottom-1 left-0 w-0 h-px bg-[#007BFF] transition-all duration-300 group-hover:w-full"></span>
+      </a>
+      <a href="#contact" class="nav-link text-[13px] tracking-wide text-white/60 hover:text-white transition-colors duration-300 relative group">
+        Contact
+        <span class="absolute -bottom-1 left-0 w-0 h-px bg-[#007BFF] transition-all duration-300 group-hover:w-full"></span>
+      </a>
+    </nav>
 
-  const [step, setStep] = useState(1);
-  const [form, setForm] = useState({
-    propertyType: "",
-    interest: "",
-    name: "",
-    phone: "",
-    city: "",
-  });
-  const [submitted, setSubmitted] = useState(false);
+    <div class="hidden lg:flex items-center">
+      <a href="tel:+917008049055" class="flex items-center gap-2 border border-[#007BFF]/50 rounded-full px-5 py-2.5 text-[12px] tracking-wide text-white/90 hover:border-[#007BFF] hover:glow-blue transition-all duration-300">
+        <i data-lucide="phone" class="w-3.5 h-3.5 text-[#007BFF]"></i>
+        <span>+91 70080 49055</span>
+      </a>
+    </div>
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    <button id="menu-btn" class="lg:hidden text-white/80" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-6 h-6" id="menu-icon"></i>
+    </button>
+  </div>
 
-  const closeMenuAndScroll = (href) => {
-    setMenuOpen(false);
-    const el = document.querySelector(href);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-  };
+  <div id="mobile-menu" class="hidden lg:hidden bg-[#0b0b0b]/95 backdrop-blur-xl border-t border-white/10 px-6 py-6 flex-col gap-5">
+    <a href="#ecosystem" class="mobile-link block text-sm tracking-wide text-white/70 hover:text-white py-1">Ecosystem</a>
+    <a href="#vault" class="mobile-link block text-sm tracking-wide text-white/70 hover:text-white py-1">The Hardware Vault</a>
+    <a href="#core" class="mobile-link block text-sm tracking-wide text-white/70 hover:text-white py-1">Industrial Core</a>
+    <a href="#trust" class="mobile-link block text-sm tracking-wide text-white/70 hover:text-white py-1">Trust Wall</a>
+    <a href="#contact" class="mobile-link block text-sm tracking-wide text-white/70 hover:text-white py-1">Contact</a>
+    <div class="flex flex-col gap-2 pt-3 mt-2 border-t border-white/10">
+      <a href="tel:+917008049055" class="text-sm text-white/80 flex items-center gap-2"><i data-lucide="phone" class="w-3.5 h-3.5 text-[#007BFF]"></i> +91 70080 49055</a>
+      <a href="tel:+919557744220" class="text-sm text-white/80 flex items-center gap-2"><i data-lucide="phone" class="w-3.5 h-3.5 text-[#E65100]"></i> +91 95577 44220</a>
+    </div>
+  </div>
+</header>
 
-  const canAdvanceStep1 = form.propertyType !== "";
-  const canAdvanceStep2 = form.interest !== "";
-  const canSubmit = form.name.trim() !== "" && form.phone.trim() !== "" && form.city.trim() !== "";
+<!-- ============================= HERO ============================= -->
+<section class="relative pt-40 pb-16 px-6 lg:px-10 overflow-hidden">
+  <div class="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 blur-3xl"
+       style="background: radial-gradient(circle, rgba(0,123,255,0.5) 0%, rgba(230,81,0,0.25) 45%, transparent 70%);"></div>
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (canSubmit) setSubmitted(true);
-  };
+  <div class="max-w-6xl mx-auto relative text-center">
+    <p class="reveal text-[11px] tracking-[0.3em] text-white/40 mb-8 flex items-center justify-center gap-2">
+      <span class="w-8 h-px bg-[#E65100]"></span> ODISHA · INDUSTRIAL-GRADE HOME AUTOMATION <span class="w-8 h-px bg-[#E65100]"></span>
+    </p>
 
-  return (
-    <div className="min-h-screen w-full bg-[#0b0b0b] text-white font-sans antialiased selection:bg-[#007BFF]/30 selection:text-white">
-      <style>{`
-        @keyframes marquee-left {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        @keyframes marquee-right {
-          0% { transform: translateX(-50%); }
-          100% { transform: translateX(0); }
-        }
-        .animate-marquee-left { animation: marquee-left 32s linear infinite; }
-        .animate-marquee-right { animation: marquee-right 38s linear infinite; }
-        .glow-blue { box-shadow: 0 0 0 1px rgba(0,123,255,0.25), 0 0 40px -12px rgba(0,123,255,0.45); }
-        .glow-orange { box-shadow: 0 0 0 1px rgba(230,81,0,0.25), 0 0 40px -12px rgba(230,81,0,0.45); }
-        .text-balance { text-wrap: balance; }
-      `}</style>
+    <!-- Logo display card -->
+    <div class="reveal flex justify-center mb-12">
+      <div class="relative float-glow">
+        <div class="pointer-events-none absolute inset-0 rounded-3xl blur-2xl opacity-60"
+             style="background: radial-gradient(circle, rgba(0,123,255,0.35), rgba(230,81,0,0.25) 60%, transparent 75%);"></div>
+        <div class="relative bg-white/[0.04] border border-white/10 rounded-3xl px-14 py-10 backdrop-blur-sm glow-blue">
+          <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAABS+ElEQVR4nO29d5Rdx33n+am66cXOCY2cAYIASTBDzIoMlkQrjmxaXo3XsscazbGPfDy2Z+bs2V15d87aY09caTTyeLySFWxZiQqUmDMIEARAgMih0QGd04s3Ve0f93WjG6EbJEFKnFefc/q87tc31q37rV9V/X6/ElprDAZDfSJ/0RdgMBh+cRgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhj7F/0BRgMv/QEZzU6BiEAF9x28Yu+pCuFEQCD4WIU+jXlERg6DdVpqBZRUYCQDiLboMm1QLYV3bQG0dDxjhUEIwAGw1yCEc1wDyNHX2XkzDGqUyMQVlDVMjoMEUJgux5WOkvgNtFy1S20rd6s86uueUeKgNBa/6KvwWD45aBwVAcvP8np13YxMTxAJt9IRbnkW7rINzZjCY2qVvCDEqVKmWKlRFitkMrk2Xz19eRvfTfkNr6jhMAIgMEAMHxEH37qhwwfeJ72dMySjlaalq6Ebe+CXCsIFzSgfSCEsApnzzC+fydn+/qZKEY0r97Gmnd9iPSGm94xImC6AAYDUI0EIyWF1dTJ5m1rYfVSaGwCbcOpk4yfOcP05BRZF9o7WmHlcli5nJZlS2g5fpxXX9rPaMGnrRqQ/kXfzOvgdVkAw6Bn5g3b4E2r3AjoCmABLtB+BY5pMLxRysdf1hkxDa0ZGO2F4SFeeOp5lAbHcnFtSVQtEoRVck2NdHR103X7ndDQAqMFyoWIzNrrIfvOmSW4pAAMgx4O4eldo0xWAiani5SrPkopAGINsVZMFavoN3i7AkVzPkvGtWhpyLOso4n1S5rY0AWdRgwMvwj8Ps3Z4+x79Af0nzhKc0Oe7s4uutpasSRUKiWmiwVGJiYZnSojvUbuuu+DyM3bwMqAveQdVW8v2gXYV0Q/tXeIXUfOcLR/kukQChWfIAoRGqSUCCHQSNxMFi1AaIkW6nV9CiJEOIYOqwilaUw7rOtu5sZNK9lx1Sq9camkwwiB4e3EWyYq1VM6sHN0rFzHDbfcAF2dkPIARV5AXkiWDg5zdPd+jpweoajSNLwDX344zwLoA/3S0Zgn9h5l58FTnBgqkO9ehy89YmGBEEgBlgQbjRCaoFIGoRFaoF/nJ2gyrkUY+ZRLAYFfIuMIVrRm2LKsjTVtWe7dsYoV+SvT5TAYLhd15iUt0wIyEoYHCI8cZWRkhFSugZbVa2H5Ksi2oPonkEvXQKrtHVk/ZwVgGPTPXgv59s92suvIGfDyNHavYnCqinKyCMdDWBKiAB1W0XGAUDGO48DrbPlnPkGhwgDbc7GdNHEcE1aKyNgnb4W0uCGfeN8O7trWwo05IwCGtxn/tB544sf0HTtAdXKcfL6RSgTjQcyqLddw9V3vh8YN7+h6OdsF+O7OKf76R88xJXKkO9dQLpcJgoC0rQlVmbBSRdoCV2rQAUIHOK5DoEJiBFKDQl3wKZRGC0XtdUdq0EIjkzkVsAQ6jvDjMkophGXjei4xMZNxib/+3uMUprez/ANrdJexAgxvJ9Kja/lqpkYGaMvnaWlpY6ISEU+VcHItkG3+RV/hm8YGeGkcvfPYWYYDjzCdJxKCWFSJowBLgyUFrgUxCqliJDGObWE5FjqSWEKQGPTygk+knv0bYde+B1kbQ7C0hZYCrQVaayw0QghCJQiViyTNgTPj7DyxjA+tdX9hBfV6GQWteefPbIwmj2uWNhCjoN/OLtnca3ij531D16wVcs0KNi9pBB0A0CQ9Vrs5cLKg1Ru5lNfF6y3/0dpVidrPzHYjtfoomV+Gdh/oR186wYuvnWBa55HCAcBxHHQUglJIVyKkhYo0fhiC0FSR6DCsHVYjNLXBwPmfKI0WIBHzPoUGJQSWl0MpkFph6RiIkWgUFtpyCWSGV08N8bMX97Gs6UZ9fesbr3jDoMcjGJ6GoQmYLlaJomDBfaIoOjfoqTVaJwJl2zYNssInrpk/5XN0Cr3rcA8VkSG2HYiVFiQVRSNRyegJApBaI4hAqNr/JCDRtVsUaKSKyXo2Lfk0LQ02bY3Q6L51wjIMerAMo1NQ9GFoZAItkslfBchaBZO1inn+LJKqBZhaOsLVPh0pzX3XdF/2tR6roocmYXQaikFAueKjBHNnmjS18hQahI7nnFcidTK7JFGAQmsBUmJZFrYOtRtO8slb1i5+PeUzmpFe8EKY7IehPsqnT+E0tOJcfQOkGyFywR3VNLdD+srEAwzXXI1GqzBVhuMnJxcof4XWca0uJXccSbvWxVZJOYSRFlokrstBlbxrsSSj9T0bmgWAPRDBrsOnODtZwWrrJNYaW0psN4UKK2jLJtYCSwgcW+JID8dzUdKlUq3iSsFMBb8YMy/MDHN/10jKQYwWFkpKpLDQcUQYhWhLY9kecSrPyESRfScGOdI/wfWtr9/sOlxG7zlW4NUTvfQMFxgtVihVQyphBCpecKwiDhXCAomFIgYlEBZ4TopWWeAT13x03rn2HBvgW488T39BIVLZpALWUEg0FjNR2Em5JRVYC4lKHuXs9lIr0BEOMZ4laMx4dLc2sXL5ElYt69bLml3uWvrmhWAQdO8EHDo1woneIU4OjDA0Pk2hGhMqca4CinMVTSYdOjQWSsyPKpdaYeuQjCpyw5o27rume8HznwG970jMvsMnONE3zPB0iaIf42uBH6vZl79W8VFCIWtjSLMNzUyZapBEtRcAwijCcRwsKXF1haUZWLVyhb5liXNhuflndOnwQU6eOI5fKRFMDWMVztIiK+SCIpNjw8hsEw1DfYwEFuOxQ65rPU0tS1izcpWWq9eB1/m6n8cg6OODcPh0Pyd6hzg9OEb/8Dhj0xUy+aZLl7+YKRWwVFKHYiFr30dYWuNoAbFGeGlUWKUta3PDmnbu2XAzAPae49AzXsbO5PBSLlOlCrbrIGxJHNp4+SbK5TJhtYpUEcRVCFwC6TFVquJ53oI3N9NCzLz4cwVAaoVj2SAjlEyD44BMfAx0zbLA9pDpRkZKkxw/O8XotubLNuWGQf9/PzvCyZEir50Z4/TwNNOBRttpbMdF2C62kCihkVpc9FPHiUEltUi6QFoghCSlPKQK55mWI6CrMsNQRdJfEbhuA7Gm9mJD0ronLZXQycPTInmw6FqXac6tCa1xLIEKfIJCCTVcJHWmSOOxMVqbe2jLSM6+5yZ90zqPtd4bE4K9MXr3EcXzu/bw2rEehqcqBNpCWSmEkwLbYeblOt/Ci4Uglim0ni8Ato7xVIVsHDNYiBmEi47fjID+6ashh3rH2H/4KCd7zzJZidF2CuGl0ZaDts7NVOta6cwdRJ6Zjj4nqlFiQ2kFQhEojRVZSB1hVUugoFKzcufhn9Yc38fJXU8TBVWaW1rRaZgYHEPrIo1Zi/bOLBUFo0PHwcqyaf02wnTMSN8hjvQeYVN1CnHtfZdd9iOgD47DwZ4KL+8/yNFT/YyXQpTloawWVIPNVBRfsvy1gLj2u1UzxOJZaympdY4W6FCjlCT2QwpBwPKSmq239svHR5mOLDL5JiKtEUEZaWcIAk2kNVacTPVlZUhLCtLKx7IiYlsyTYxjB7CIBTDDxSwBW0SMl30m/QpRKkfKsZG2SlpmrYliTSrXQGlymlODE5RYRdtlFO7OEfQjO4/w05cOMKk8puMUYbYLrymF5TrJIGXNqYmasjLTssz5FEqgpUZqidYRQgmELZBuGqvWes/eKyBTWWS6ARFLrHw7YTTXRJaI2ZZq5twKC1BizrjJTBlpEI6Dg8JTMSoK0ZFPIQopFmIGp8r8l+88yalbNvPRu1boDe7rE4GXCuivPHyIY8PTnOkfouCDk+nAzeWx3AzCsqlW/DnPLKl1YnY6V6KFTTJyk9xfct0xQqWwIoGyNNFFzj0M+pU++NajLzJYFkwUKlTdZuyGHLaXRQmLUMXJ2BAz6nGpeiZrVohCaoUgZsZesISFZVlYOkaUHHDLXOz9pzpF776dMHWW6+68AzZeBTpi5BsjBCM+qjKFEjFxDCqAletX0Pj+u8BuoHv3Pg6+sJvho2k6r7pK4666rOcw5MP/+OErnJzw6Ts7wlQlRNhpbC+LsFPEGtzsuQb2gvIHtEzKXMYkXUkhiQW1mTlQkUK7AuGksFMl4micyHZnBxbsE6NFqlYO20kR+RUcC1KWplCu4HgZioUp0lbMzeu7uP2qbrpTAWlLItMNhLFGBZVaf+vinG8BzP09FjZnx4vsPNLPM8fHGS1GyGwDrusi8FGxJtYxTjpNMRIMTZSYDkj8hhfgiT70dx7fw5OvnmRcZPGdPCqVRjppEDE6ClB+hTjwEU6qpqgX91eQyJrdCbGOQYG0JSJWhJTnDahIQMchURTghxLlV6lGydCLrJmkM87UllYIIrTQnDNuQSNqJlzSqpWmAxzHwXVdbNtOXkw7Io5jKspj/8golZ3H0VrxiTtX6XWpyxOBfzxU0k8e6OW5Q72Mxw6hzOE0ZtCOQ0lpqpMFwjAk7aWSroiotarMmN41gay1wMl1SzQ2WkdI5RPERXR08Qt66pUJvvfCqxwemqZs5dBuFmk5RJaDH8eEQUAY+djSgtrsESTjIvOYNY+T6wqFrl2vSsZbbBcRK1zAjjVxHBOHF7mg4SFGBs4g/SIQJj1trZmYmsYOI2KVtK6O55F1bKJIwfAgLHGw3JC8KhJODMLEMHSuWrT8j06hf/zCcV44fIZpuwntNZPKppCui0IQhiFBEBBW/UuWvxagpJvMrNUas0hCLGe6SSDjWrdShrgSQuUTR+XZZ2IXAsBOJa1tEJJ2k8oWFcqkbRsnDlnW0sg9167hwes8ll5gyr25kfkRcrq7q4OR4ovsPzOBihwsG0QcE8cRUse4wkWFJYKqvZCxwSjoI6Pw7cdf5rlD/RS8duJ0MyEOkdKIICAVV0hpnwYinJQiUqVkZ5H0q2bvTiSnciwLAC2TyqOFRmDhipAmUZl3/jYQWgotHRdpS6Tt4MrkgTlK4WgfLy7j6hCLCGb7cecqtcaa7dMqJHHKIhKKSMUEFUEIxEIipAt2iublaznac5gfvfAqq5a0sm5bftEyf24c/ejek3z3qT14S9YTWy5CCSJLIhVoHZCxBY5r4+oqjooT01rMFP65LoxMfkFjE4tkTEAIjUuVrK6S0eqCGvLKFPrFowM8vf8UVvtKtJcDYRMoRRyEiDgkJWOaXIHUPkJrLJ0M6s3tbCiAmkDMtQCSm5DEUhIpmzjWOFrhBJOkZUDmYoqkYxo8m3KxzMjLu5HHevCrFYhCsuk0QlkUSwVckcJxXSYmJpA7d+JkXmV6aJhgahg7k4fy9KLlD/DKqTG+/+QufNpQMktkWfhaoKoBqJi0gAYrxlIRjooQxLXyP2c5Jlajg0Qia2b/zKiSIukKaFEbp48dHO3jRFNkyc42XLZQGltAuVwknXLRSKYrIZlsjjiOsS1BeWyQW9dfe5GX/83TDmLbOqnbrQrZ6jBu2mWqUES6HhnLRfsV4kKVvCrTZKXQZSB18WNNA//jJ6/w9P4eVPNSyqFHILP4foStQ3IyJhUW8PxJ2rOSrsYc61Ytx7MFacfGtS0sW6K1rlkfCkvImvom59Ci1kojycStF1xDjEUl0liOQ6wFSgt0GOJPj3DdskZ+90N34pRG0HGI46UphzHCktgkMwzVSFPxQ0K/gh/D4GSFYwPjnBidZDLQVCNFtrkDO9/AyPgU0eQ4S1auoH94gL/7+Ut05Hfo965OX/I5PT6C/tI/Ps+rZyZwO1YT4KJiSRAEtLU2E1QLjA8NsLTBpjvrsr6jkQZH0ZBJkcumcb00lrCSgQsV4UdBrUysOTMcGlv7eKrC1lVd82YsRkH/7LkTvHC0H9m6HGWlCQNFJQppb2thrP80GSp0ZmFdRyPLOjpISU3GdUh7Nq7jgJDE2iLUilhHNXM3mUeZ6RsrLDSSYtknm85gqwjpF1nRmqHdjklC0OYQVtCVAnYUoKtlRgp9RKFPg64yMTKGtWQVlcgjiAOqlTJ2ppHh/j6qsaI57eFZAbYVQnZxAT5QQf/j8wcZUQ04bo5KNSZOWzjZFJFfIpiaJGPHrG7KsGlpK1lbkfUc0ikb13MQFkBUs64lUkksdW6cIJbnxgIiJRKrMwahAhrdtazsaKC3pPXyrBCzIyxSz0xVCZQQCCFmv7MI8d7CKc91IO6+eplev6wdq6GTqXKAdNMECmIFaVcQjjWxptmhPXvxYwyCfva1kFNDBUoyg4osQi2I/YDGtIMoTeNMj7Ch3eWmTdu4eetGrl4ryHHh3OibRc85lOM4OA6k3RauWt3FXRsEXVz+lNEQ6KMTcLhfs/dEL7v2H6JnfICpcoCyPBwJkYKScBn1BT2j07D64gGpw6D3nZqmdyqiKLKE0sMPQloam/ALEdXRPtJWxM3rOrhz+0auXtbMjjXWmxL+0UI4z2ZXQM/QOONlRSBdLGmTT6WgElCeGMONSty2dSV3b13FdWsbWdOWOKtcbNpzxteCi/x/7v/mzocvRLFcImvbdFy1mY62laAiGDjC+ImTtGy5CbqWQXWKwqv7STU04KxfD54Lg/0MPPUzxsdHaZoYJ92x8Hl6R2GwDEWRwlMWtm0RWxZhtQh+kbVtOd6zaSW3blzKbZsEb8YBbqjW6bzUtPEvTT6Az9x1LpPKEGgLiDhnHNu0Ljj3fawffv7k8/QPTyGsfNKdcQSCAKdQwa2OsHVZI7961/XcfV3zW2LNnI9EUSpO40qNRYBlv/5TdoLobIZVzUKvXboCN5ig/NIheitTNHWuIKqWCSNFLCTTpQpHT5xh+MZOfbEgqgN9Ibv3HWJ4okhsZ5OxGOXjUkWE47jRNNes7ua977qWe7ZmyfLm/Q3a8vOn2wanoKd/gEokEBmLQrFIa2uatIwRYYFlLRYP3nY1795ksWSRcy/0Ur9uQfdSeI3NNGZd2HAVtKxMvk9ZNJGCDddASxfogHxZQmMDrFuXiIS2yDV3UQ0FXiqz6KlO9fQzNlVAywZ8AcIRuLZCF6fJBkWu37CKj9y6jB0db76OLhZV+0sjAHN5I6HAB08OsPfIGYpuJ6QbCSsBjY6Lo8r442fZuDTPr917Gx/ZlHpLX3yha15YNeWybRtLBWgVoaL4DedhXw7CaUb7N25heGKa8ePTOJYkFoIwVlh2ilLoc6pvkJEidOTm7z8KeterJzh4spdSmMZKpYgRuOkMUxOjpKuTbN+wjH/ygdu4fhVvqtVZiDPDAaOFMrjtCDdFXInxfR8dlGnAZ113Czddxst/xfGrVMKInr4Ryj/5GRM6h9YaWRhkbGyMzqFkek4HZYaHB0k1NJLb8yrEAbm4TNDXR6p9KTK1+JhY39mzFMoRsiFNFGuETAaFXRXTnpJs7m6/Ii//5fBLKQCvlxMhen/POCNBCqtlCbGTp1wep1G6RKVxulvy3H/XLbxr0yUGD644M96RCs+2IZLI+JzX2hulC8T1q2x9aPMaXujZz8TUFJ5jo2KNdFMoVWF4eoKJInCeAPRMwaunBhgrx1iNeYTjEYUKx/MYHznLNe3NvOeOW9i+6q17+UdBD02HlJQD6SYqSpJtbEJHAXEQIm1FU8bhEr28t5yMbSPTadoaGkjZDWgh0HYZS4V0NOaTwfLARgZlvFwD2aYGFBq3Ms2kbUMUgV9d8ByjoMfGp/FjjbQ9hFQEYRUnjnHRtObzrFm65G264/9JBOCVoyWO9Y1Aphnt5ajESfMbhyVSUZHt21Zx9/aWt6xiz0fVvNESGYiiCBGFRIFPFPhv+gI6QGxc2a2bsieYmFZoWydjNraDshz8SFL2L9zvcE+B04PTxHYO22sg1Ml0rI5CGtMOO67ZxB1X2295yxtGMTEWCAu/EmF5FkIp3HSKjGvjpH5BCbUcB0dAe1sr+dtvI99Y817sP8LSkydh281J5h/t07V/HzQ2wpo1ySxE/2nyYycZr0QQXaTw56CBcrWKkg5gg6WIKhFaamw00rbJN7zldzvL/xQCcOj4aYYmJkhnuiiFFYg0ja7G9idp9XxuvWoFm5y30aQUM1NWGse2kNIlJVJ43ht01zuPZW2C5nyOs34IKLRM5no1kkg4+OcZGiOgT/SNMFwKIdVCKG3K5TJpR2L5JVa2pbl960rWvMUvfxuIrC20R0wl8hFaEAUCLcFzMviiTDGQXGya/i3HrzI2NMhkb4nr8s3opm6iKCAeOUXPyVOsmI7IdS2FyhRHD+wn09DIstEBsD2iySHGBvtRqfyiJdgOQkqpHSe5TxkrpJS4nk1YLjNcLDFUSp7Z2xFI9o4XgEHQA2MFioHCbvSIKj5CKRpzAj1ZpLHBYv3Kxadm3irCMMQVcTKrL/QVmW1oTIODQodVLNcBBKFKXJZjIWu/nxttKEUwPFmmEEjIpQgjqAY+DW4KKyyyNN/C2q43e1WXR95zcKTG0jFpJ4XnpgjDkFK1QqE4QU9OMAHk3uaIQ6Sko6MDVZ6iUC4xXugljmMyYQnhuEyXK5w9+BqOqqKlIFQxxw4fJkLQaCf+CalMBtzFu5kp2yLt2sRCEUcBjmWTzuUo+UUGJ8Y4PTRFeUPjW3/PgD0T6QY1r71akQshON/p6peRs1XYd/wMVqqRSjXAtjy0jvBLZZpTLlu3rSX9i3v/sazEoyiOY6S8MksxrhKItqytU1IR6RiNwLIFURzj5TMEccRcB63eswF7Dx/HyTdRFTbStmhubCIqjyFLU1yz4Xo6Fh+8viK0t6Voachy5Ewf7Wu2UKlWQQik42JnGxkphnzzx2f46G0raHsbTWGkZLJapa2xiaa776GpfXXy/cBxmvbvJ3vn/ZDKgfLxX3wWb9lyWLkCdARjZxn+Wi+TlZB2P15UtTasXcX3DuwhvayV2JGU/YDJyUk8y0OmGnh85366G2/l/dtsvewtFkFbKTXPXz/5/Y2dcxR0WNv7gv52MKLRM55Mill10SJx5/Rq+dT8vmQ74dWOUNteA5GA7PzQ0vEKVPCIbI8IidKaxC3KItKClZs2YEk4DdrjnMkz458+4w5yvpuDnHOV8bmrRZD4IV1u6yQ1NTfWK6umlo6wdESsrdlZhxm/Dc4LzqkGEdVY1/z2JVophAqRQrB23UYyje3U/Nf0jJt8BLORDhd4381hJnzJqm0/s5/FxcupvRmWL+ng8LiPX5oiUoJYCZx0DiedpX+0nx88vpPhvl62b1yhf+XO5VicO8jc5yXP+3um5kp4/bkkhUDaFuVKBU6cID5bouJXYaKfvv4B1r52iGoErvI53dNLWxjhDQwQBSE5EVBVNqmGVsRltDZL25tZ0d7ASGWakh8iPI90KoclNHEUcersNN/40dPs3dfMZx+6TmdI5Nziwvo683fMuXoq5my7WDfCjqKodv8X+uprrS+rFL+/u0f/7JWTnK0IQreRxozLHVev0L+6PY/oO8XASz8i6j1Au5d45MVRFSmTAI5Y28TCJhKOtnRESpWRRETCIxaQ8lyUhkBZhPklrLv/n2oaVsxe1sgklLWNtlNEyiYUFpa0CJSmoBX/91d+wHeWdSLDEqpaJO3YJI6tHtVqlYxjIVHEc3pDM/HkCokfRHjZPGGsSHsuyi+REiHtGal/++Mf4KaLTdfoK9PSL4SgJi5zrjkJL77wckplnzAG5SSvt4pihAqxLY+9JwYZGX+OR55ycVSVKCwRS0UkbWKVBC8lU5vnYhY0AqFr5SVCJApLJ74IkfBQgK198vEkf/2vPjnPlM97sHnDSg4MT3F44CytnauYrsQopZCpNFaulanyBDtPT3J4uMp/f+wgUtpIx06c01SEVElyWiEV2XRyPlUrc1soHKFIqUg7RLz7jnfR3dbChrWQZwFhEII4jJgoTHDm2DFG4j7K5TLNosRAXx8y00qx5JOSEWf7e6iWJoilg68dWjIexakKlu2zJBJcLNZoLptWt7FlRQePvHKSxs5lFGNJqVJFYpGx89j5LGeLJc6+NsjP/ugf8GwLx3HwLBdr5ugyiXx0ZCK7SjrEslYnhMaNI2wdc/vNN+qWfJr1q5tZ38YF/i92GIZJKq7zugFCCNR5sfyXYumaleR7K7yw5zg9E+PkcjnCSCOqbfyvO1YLZ3id7jn5EhMDh+nMSbIO+GFAGGsENhYWQjhYxHhxAUvHBNKptVYRQawohRZx+0bwJ4EVs+eeng5QSiWmdhwjEMhaDoOqcoitLL0FqBRDpLJJuS6hFiBT+JFF2k+0VCHRQiC0TiL0VBKq64cWTiyp+Jq0B3ZsQbXAkryLbLpYach5adKVkOc7nV4RZhKIzIQaS50EfyT+B/MFqFSp4kca7dauRCeRhcJL0di1nEIYcnisSOxX0RqEayNTGSzbJagGtSQbiQDMxKYLVTuWtEDE2CrxTY9qoXauDmkOFedPijnANevbOdLTTE/PKYQ/ha09wtiiXNE4dop0+1KCsMLx8UmsVA6kA9pGCo0VR1hEs89JRxaxgLgmAC4Kh5CUivEQHPvu43S3N7H9qo3cet1ytnVdPDQZv0ou5dHUtJKOm29ixZL1kE7DsVdYduAATTfdAo0tEJVYtfN5Mku6YdVa0CkYG2GgOE5FODgXjX2cz7VNiBs2LNWvHDlORVeQ2kYqC4Ek1oKyFgTaRUhJIDykJbCEm2wTW0liGuIk4Ic4ma4UiXe2EAJHRdha4cYxJ36yi3xKsrq7hR3XbuLd21v11XPGou0gCOYl7bigO3AZAnBDCyK8bZNWQvHY3jP0jU3y8msVps6e5vo1D+jt2z8gtoqqPvKzr1Eq9ZNyLJAKV8RYcYgmJpSJWZsRSaCMXbupfC5FqGC8rKh4Ftjz8w+E1TKeqqCUjx1pLDuFRKBU4idtezki4RBZWRxHEFgOlTBCWjliqfB1MuashF1LuJC0pNZMOdgWoWVTCQOUkKQtSRRNM1Gqoi7S0Ccv/4whSu3Yixbh62IUdCQcIukQCzt5KYVmbuDsXCp+mATLSAk6xpIapZJnPl320VrjyjRONoOSEOk4yfOobLCd2Ui8JDNPIph2nAidtuwkMCVOOgyRdJBa1RJFeReM6LeBuLYTPb5tCUP9DRweHsH12rBsF19HFKshobJJ2zYy3UgsksxQUiZ5ohAarWMskUTClbGJsIlEMvFq6wgHG09YuDokjmJG+sbom9jN8d5e7r1xI5+67sIYDpSGKCYKQ6j6UKokiSmCgNivgu8nc/xRFVUtg19JftpbYXqMJS05QssBJ4DojMZeseBTv+vaLvpHruYbT+1Gu83ksu2ks3nCKhSmpwm0wst4xFoQWxKkg9ICKXTSza0l/wiUm+TQ0oBMfE8sbeNosFEoKSkFEUNHBzneN8jg2c184r1X6WvztWCgMAxnBWC2n1uLBXg9qwbd2o6Ibt6otRY8secYI2XNeJzh//jqw/w/v/uAXnfdh8Wy0QE9sOsnTFaHcS1NSiZxBmiJ0nK2DzubYUZLJsfGkbZFEEBQKUI4f57VsQSWqIVD6lquQa1rVoGFihUKgbQchCVQsSKKYiwZE6mkIsG54AmVlCNaJyO7WlpEKhnAsywLz5JkG/JkRYnUxeZQ9DljWSDmWANXTgWS49vE2LUgHGaj82qXMI9Yk9y/EGgV40iLsPYipVJOErWoJXEcE4UBYRyjiBAixsFG61q2GalQmlrwTVLekUgSwia5IkErSYwi1nFyvItoUhuIO7Yu0aXSdv7+yX0cH59g0q9iZVrwUi5xpAljcNNpKkGcxMHX0l8pNEpbxEKAsLAdDylspJbEtTAtoRWakBiFk23BL0wxUClQPNpH5BdoSN+sH9jUNP+qvDSVUDExPki891VG41OUygU6HJ/+vj7WOAcplCukRcRgXw9tk2Xiw6dZtmYtY6ePkR87TSqXIXzlGbLrCtA2rXFz4NjgLrvg4V+dQ3zkni16rDDN/r5JTg33ExaLuLkWsvkUCg9hC6qFKpYWKKFwsFEkFrq2NFg2BEk3TddCgC0ESlgorYkEOG6GVMrFL0/QM3yGn+7cT8azSd+zQW9MI+woSqKKEoW9/H7/xbh9iSXy92zWttQ8vLuPk8MlTgdV/utjp/jcPav1iuvuZ3lUYezAE+jqKLYEKWSSWMJyiYFQJeamLxOHEM+ycRyLtB8nJll6vgWQ8jJgpwm1RaTBslKJauoQR9qo2EeoGFcFuFKAVggR49ohZb9KqhbuG4mkzy9RWERIkbRo0oJAaVxLQliBagUrLiDjacoTQPP8MrjSrf2l0NTKbW4CkUtsq5BJlichII5wUx6xTLpXpdI0rptEgUahIlYhni1xXQdbCnQYgIBIyppIKgQaR0YIIFTJqLenfCQQCA9EkhLM0Rr3EhfVBeK9t6zTsYIXDg3wSn+JKR0m2XpsQawVkV/BteyaAIBGo4VASZvISmEJjeOXQGkkNlEtN4ESmgAIhSDQHqHViNPYTCWc4uDABI/tO8myru362qY5RWY5yGwDbU3NLL/xXSzPd6PCiGD4JLJ1OSuvvYNqqHC1j2g/RvuSbjKewAoLjBSHkMUBwqrg9IujyEOv0tWygpala3DWb4RlaOwLReCGRkTqo7fqZ14d5Sc7D3Kgf4xiGUQqT4TEr4RYlocUEge7lk4myVQV2hop49oUcy0DojiXmkXUhkjLQUwkFU6miXSHYmyynydePkBHUwO5d3VpO6qlrDo3mKRn+5PoZL42Sf90eRXz2kZEeNdVuhC6PLG3B5Fawjcf30WKEv/7x64WqRsf0PHIWao9e3GjAu6sHZ201GHtSmKVhOCGKpkkCMMYP4wgmD8ObXsOwpJEuvYCCwuNRiiNJ0JWdzTQ4CqsICBjJzl5kC5uOkuhLEjZSRLFuNZTT4x3G1GzAGItiBVg28Q+EFTJygxZNGvPe/khGSJ7q0l6GbVWeDbhqH3OgptNHFH7W4gk9Rokpr2UyNqAWmvOpjXn0ZHycHSMRYxtJ+Z9EAR4TqZ2fFHrAmgQEZZOBgej2EZosPVMpjoXJcDWklycY+UCps8yEB/esU7feuM6nj5Q5Km9Rzh8epiq0qQclyj2UaGillOaWCuUtoi0RWx7eChyugo6xsclEC6BtImxUMJBCYuq7xPE4KZzYEnODo6y78QQh/rLdDdlzgVNxTHlaoW0nYb2RmjvRCJJyRKp4SFobyLV2ALEZIZ6yec92LAaBnuxiZEiojGboVlr/GCCcv800wNHCQ69wLJr3kXjhls1S7ZdaAlkEB03t+lrrrqTx3ef5bn9R+kbGyPUAuk6aC2QWNixQGiFUhEhEYGKEAKcKMkHqGpjAEpaxMJGiRSR8Eg7aSami3jpNC2N7fhhleMjw+w/PcI1N3RhCzeDoxUq8iGOSFkWSgUEkcCWEk8mZkXwOlq2GxsR4j3rdEfW4u8e3UVTZxM/OToAP03r//0DG8WKT/6hHvvuf2Tslcdo9RyyKYuwWiWOFF42m5iO1RKplEusYsJQ4TgOlSCGdNO8c3W0gV8tgufS2trNwFiJ5uZmRFzGq4zz8Xuv5UM3ehdEts2kSb7SS48l03G17H466VrClbcMLJ0Mhik0YBNLSSwsJPEFGZqWL1+KDvdRCW3yLZ1MFgp0NDVSHDlDzpZ87Lab+eSNaZbPKYuhWk9CcOlQXHjzYdRtINoc2HJdjo9cd70uAuOTMDHhUygWGR0dS7ouUiCwEJYN0gZpIUVMW8ZlfHKKQuzRN+Xzyok+zoyMUYothJ2hwWkgdlzCaoBwHbJNHYxVC/z46Z3cvuXuuQVK1taUhnsY/tG3mKpoCqUSzbkUo6OjVAdPMVWqJgvhqIDSIU354QrZxi5a2zqx4zFGpsbwWlpxhUCXRmj0bMrjAww/d5ahQ6/Qfe27de6Wj11QXh0gOvKw4+4lDN69RI+XYXRcM10oMjo6DjIRASElQlhgSZSVzC8HQTUJMtM2E8UKRwbOcmJoirPlKuWiwHbaaMk0EiKZGK+Q9pqJUjF7To6x8SjYcayJiZFKIGsj/5FOEjwgoVou0SCjhRLxXJQbmhDOLav1RLHII7sPc2KgiO1aLGlK69+9pVu07nhQV0tlpnpehqBCyk1jy4BSoYhlWWRT3myGHqVnEmQlgx9zSacg61lUoggd+ig0vh9g+QE2ERMDp8my8YJK/Fa5Wc5EAYqLGAJvdBHV80leOp08Ja1QYiZDr2S+10KCKzWuBTIIAUmkoOqHCGFRLRcJSlOkz1vUerGIzLfCS68DRAewpglo8gAPuMiA3QUk2/SD7qmsYf9pePrlgzyz6wAybxMLTaRsfNtJUtAjGC1GTAHLZg4RK5RSeK5NR1sLHV4OhGR6ZJjy9BSru9uwWjtRpQqHX3uVxrTL2mu2gM5AUCbyh8FJUUq3MTk5DZUqeTdFgw7wwmmqpUGs4tCid9IFoisDSdqifO3n8jnDBn1kGH625wxP7j7KZDXGj6tJ6jtLEgpNZLlMKsHRoRCbOEKpqGb7OigNITax5WILTToV4lk++g04aF/TjPjdX92qHTvNT3a9xkDvEA8/7bOirVXfv+56sfSDjfrMP/45U737CKKAhoyHDKIkWaewiGoZeZOBuhBHBSR2+DlaM9DZ0sj4QInQr2JZHpGGUEtCJ82RM4P4bHz9F/8OZNYMPO/VbMoLWnJpzhSDxFVLSvwgxnLTTFernB4vUOFt8gV+C1kKYmkaVmxGN7pbGOwboHc6oGqlCGqzF0pKKpFmpFKldxi2zCTv0BInlaO1tRmu3QGdy0BYNAz0s+VMD1y9FXKNSGFzVfNSaEzBqpXJFGXvMcTEGYSdo2PDbXTEMHx4N4WxM+TtAOKYsFKmUpggHZzVuG/dIqIrQKzogPY7VugmL8u3nnqZqSgkkiqZTdAxVtqmTMTBvlPYtgV+lFQKKW3CWBOj0SKZqotD0LZFdeEox0uywUL82q+s006ukR8/8SxHTp/l7362Ey1u1Q+sXSdW3PZBfeaJCsOnDyIcRTaXJ6pW8P3kRbctC4HCTjLkwXkTS1lg9ZI2Tpydplotk8rk0bZLYLlENpwcHuboKCy7nFTC70DO5cSfsZHmpxYHWNoMq5e2cWioh8gv4zlezc0pg/AiDvf0cWhwPcvf+RoAJGML165Bb9+8hqFdJ3EssJXEsmWS7VlJSn6F0ckIOmpTOVpTKFUoTozg7XkFUj3EwqJYmGZ4eJjlU1UQkkjYjE1OkfVsvCOnaWhuoDR+ltETZ0hlm1i3dD0sWU6Hm6LnyR+gxTRSKHQYElUrC1/4FeTaDELf1qoffj5G+wFKu8TCRSqFY3soJRgYGcPOpyyUHyFijW2LJI+9thAySa8cRREy4+C/ibGtThvue1c71fJ1vLB7Hy/tP4qSkpb8bXrHVfeJFSrSAZKJgSPYUuM5Er8SIaSsjXYLqA1Gnj/G5gEbl3ew++BJJgoFvIZOQstC2DYVFMOlgJ0Hh9h0Z6fufjuDS94utDzvri50TugGcdXqpfq5Az0MFKaxGzuJhUWgFJlUhp7+U+x57TTXda16WyLQ3g4aBKxbvRRr97FkwlSArWsD3Ch0kMSLQC3gwLFJuTbVSsT4+Dhj1QmK5RDXdRkZHsSRyRJ2kbAYnyiQSqVwXRs5MkRKV6mGIbZwwM2CSEMmj7ZsdBjiopEqBB1f0IV9K+lwoCFt4VWT6VMRaWwfPM8hVjGVYozd1JClUioSBOeWyLJIvKziOJn3nazCgb4yjdmMXtOY1JCZ1QBm2p5L+WCP1OIDWjJw1z2rmIpsnn1pN/t6x/nP332a1b91h15y9QfFOtCHfvYNxsdO0p6ycFw38VkXFhqVzHdb51f25HzXrF6qn+9oYmBqBBVWQTjEQuJrULi8dOAYVy9vp3vN21f4byeKc2szQjxvanCGq1a3sLytgcGeKYh8lOUSRgLX9qgENvuPD3DsmlW0X06X+x2ABJobUqgwQIsoWaIulol/iEg8T6OZGahoRBOHZNIu3U3LaLv5ZlZ1roZUHo4dpXDmNPktm6CjA8o+lX37STc2w5YtUC7A6WP0hZNEdgZEbZAyDNG2JK5GuE5Mkhw64mIC/VaWgWtL0q5DLBxCZSO0JgohjMFLudj5xmaGRycIQ40ULkpEMGctPDvXTM/YIF97Yj/fe7xCkwfV8jQylUcIi862BoQS+EHicGJLoS2h0LqE0kGyyrASZBu7ie0svYMTVESGSGmePzrE//vT4zx0+zq9/uoPipWTE/rsiz/ErwyRty1iv5x4f0kLrSHGpZYSdR53LEU8v6ZbH+oZZjwsESER0kZpByvTxJG+MX72/Mu0ZG/U7+r8n6OFO8d5FeoSI42buuDqNUs4NjhFISonvvPSpRRp7Fw3h86W+e4zR7Fu26Bvbnvnl1EM9PRPoOaMXocaLBwsmUa7FtKbkzbJr1KcHMW2Q9pG+sCyINsEE4MEEwMwkgNVgnKFePQMxAU4mwLPg+o0UXGKipV4DiaOEU4SU0EVLImMBFHk83YsKDp7S0Cp6KNDB2nV3O1dMevpmW5pxm7xoE9GSJ209qo23WCJmDCOyDQ0UCikGaxYxFVoSDuUig6ul6xQcvjsWRzHI8YhUElElWVpYl1BKx/PSrzq4tGzaJHCcjJYudZkes9O8bc/f4V8Nscf3tVF5ub7yAz2Ujz6ArYuITQ4InHeObfk0cUVdOPydtoyFsWwjIWD4+WRjoebbmFkYIxn9p+kvaWJjvev1+utd34Fn8/MijzM+5zLUhAbl7XrtuxRgmqFEBvbSVEOFA1NXfQNH+OnL71GV1szXbe164Xm798JTAKvHDhMJGyUtNDCBWmhdIQUFiltk5nxKbPbBfm8zqTT+OMjTO/fxfjzzzFV8mltaWdsdJhorJ9ScRLHcYg1TA2kKO1+jsgP6epsw9MK5dYaKCHBtihWK6SFRsgkpjSOqiy4sMUVZBj04WEYnapQ1jaxq9ESLM9BRSGOA21NGeR7t7fT4YaEpQkEmlhBGMRYSmGpAL84QWM+S2Q5kGtJVnHJd1GSWaYjmzjdSNXKULVyRG4jJbuRSdnAlNPKdKqDcbuVabuNsteKbzdQxKUYCSpaElhpyqk2vvnEPv7j46c1TrtY8iv/C02bdjBY1mgvQ+BXsEWU+AW4DpcKq33XNW28+5ZryEufND5pV1AulylGmkzHKqasRv7hqX38xdd28/Oz6L63KNvBjMvw3BWFZ7icwKrLZcZdO1RJJJ2eyYsvL32e993QxK1b16OKI8jqJA2eIGM7VCsRMtPKaOzxP37yLH/2ty/x+AB65EqWUfns25JdYhT0zgn0139witNDk3j5ZioRTJbLCMclm/MYGTxFSzZm5dw1Sysh0rLwbFDlKTL4tKYFwp+iLe+hq9NkbYWnfDLaxw4KNFoBDVYFJ5yGOEicpWJAOGB5KGmDZeNHMZZl0diUh/ANjqa/Ds6CfvJ4zFe/8wKh1Uhza3cyK6YirBQUSsM4QYFr1nZh37gSXmixOX7GhzggnW4kDEO0iknZgsgvo6WFkg5aOIkPNiCljeUmLpuIpP8Z1+IJkiWiHNCyNiudONmeW+U08WCLhcTONDPiT/LkgX66W3L6I9cuFW33fFw7lqJ3509Zlstj4eMInSzK5gdcLGtkB4gd123Uh89O8tRrvQRK0NrcxVSxRIjGFhkqsebJ1wboHXuGbRvXcdXKdn331TYu1PrQr+/zYgNmSiniOHkpkwCZc8uKK3Xl1D85JljSQUuJRbJ4KTVBuGDhC5IB09uv3UDPwDAvHz9LZaQXN91JbDtoL42ymxnzJ3nu2CD9w4+yvCnLb370Vp1yIJOGVG0IZuamJUl+BcG5dm02F2LtCkQV2lMIMuemvnpruRmYc6y55TqXhfwNZnL/x0AhgtMD8NqpKfYeP82rp3s5PVIk1daItjOkHEEch1TK47Q4MVuW5Vk9tx5JCyWSO7GIceJkpSw7lWyURFqeW3Z8JuQ7k5JYsY8fBghpI2cXy41J2TZBKSKbSzFe9KlMBzRkVws452g1w6Xuf+7/z2emnCHxlRkcglNjJQ72DfHMwVPsOTpApmkVlDVBqBAyolooY1ULrG7v5NpOC3ubQLxrQ7c+PjDFiVKJyE6jpU0cVlBBOVn+W0XYIkbpaDZ0WEqJLUDr2iVohaWTpaK1AsScyj4bH5+E2AoiEMlglSVtQmz2nBpCRWXyudv0+9atF423/6qeHB+mOHgQogqWVGQcqzaQcnGu6ob377iOs+PTHDw7QVx0SFtZYmHjZBpwpaZcLrCrf5z9A/tpzHn82demsKXGEhJhycTXmsSFT5GsDqzFjAuxQMcKhcaxbNrtkv7Z//bJiz6zuWsizv25Uswcz3KSJB9S6FoA00wlvZB2EDeuQU/fdT1++Wn2nx7Etl3KKkvkyiS/HY0Mh1UqUzFnChWe/b9+jC0VtqWQlkYIjUIQKZEITZycKxYzax4mzycULq72ed+1q/ntT9ygG0n6pN96pp9HXzpI1Q8JY0Gx4qOwk8VaRS15ypy64znuHMvh3Np4M59SgpQuStlUQiiFAVUlEF6eXHcngxMV0g02qVQa7U8gK1NsbE/zrtUt82PjUylsL0XypENcoUBECFVFzzojz7hZn7serQWlaogfQ0MuC9kUxBUojuOFZdpa2imUijjNy1ly9Q4Avv7KoP7mz/cwFdtMTJXQQs5b9XduN2GmzsiL3L8SEU7ORsQRuVhiS49iDJOhYIoUdtdGqpGHY6dpbk5ji4C4eJZmR3NDZws3t9cS5Nxx/RpOTMPIc4fpmxgmlW8m5bgICSoOEt9xaaN0bZpQxSgUkZSz0xo1D35ml2bWyYq7M2uY69lqmfjYKwECReRXSXlpgrCBV/un+fvnD5PPX6dv7dwiVn74f9Unv/mXTI36pFQVy7GTwZlL0A7izqtcPVm8CfHMy+w92YvT0IW2UvihS1VYuLaH27Ic4oDRyCe2HITQSJEs+z2jxEidONk6SWSVFAIhJejke9dxyMrJC5I3JmWV/GgpZ12B5z7MK8WMZaFr00xKR8hFcjgsBfHuq9PaL14LahdnporEGmKVItQuykoR6SSKsopE2SmSFf80iX2riLQiVBZaC/KZxIMwkklMgEUymxRjk1IVTk74sy2VAopWA8fHIqbLAdVY0NS+DHURa2UmpiIMF/JAU8S1/wttI6QFXhZhJZmhYmXR2NQKlo0KqlAq0GYLbtywmu1rl80/VFMr6aYOCkPHKAU+DbYkl01T9UPm54PSs+dWJFmfIyVJZ7J0dbSCpyCehqEetF9lJIICTSy5+m6Cjqv51hMH9Nd393NoTFLQDrnMedcxc6ZaA2ItUN+1jNB2ROAXccohnnSILY+KkgRuBsvN4QcBYbVK2osRwTSyNMratiw3retmWwPJ0mBr04j37VijB6dinj/Uy1RQQuNipzOUiiCERGLXwhDtZKFMBJEAgTVPuZN4ZImlZ0JrraRNErLmpSbRspaFCE0chWjbwcs1EVQFzx0eROs98N6t+tbubaJ7x4f0xL5HGD+yE7sc0bZIiPJSEA/e1Kgz9nbS7OT48AS+yBHaGULhorWNihIpEtLGsWcELGnhZ5QYpdECwiBM5lA1CKvm3C8FUuqLtrNzW35N0iUQSnF+6rU3i6odMwiSvqdlWYgoqnkCL9zVWArigVs6ddq5mb/50YuEQZlyxUeoHF46h/A8VBhRjiKkkyJZwlwjRZw4ZEmBLRwkgnKlAEBUG3m09cyipwriMjqQeCQursOgCX1sCU0tLQg3y9i0j7rIzM4MrnvphTaUANLZpMsaJnXKliAtgdACoTS5lEulWECXCzRZPtesWsqdN2xnQ5s1XyVzLTQsWc3kmSOMj5cRWtFsuyTLsc6Y/LWoxNqeWgCWiy1sUukMwoph8BiMjTB56gCxChmTbazccT9N2+/l4SNFvvTTPRwJm0gt2UxluoKlYhwdcCkqF13K+Nz5bSuLslMIL+luCsvBtVwQEIcxrW15ylNjhMUx7HCS5XnB7deu5drNLUl5zRxsUxP81q+sZ0VHA4+/dIDj/b1MaxevqZOwNn8qJTjSgloBxzoRAA1EMlmSOYmlT8rMInlfZrKVqJmRfJ20tFIrpO1Rqfhox8ZNNTJenOSZw/20Nudoec8GvfGaD4slntTFiRFGCyHro8XnUZeAuH97k+5oupO/f+Q5jvRP0D8+jJ1qQmYak4BCIUhlshRLC3tnua47/8VNlmHFtiW2tfC1SCnRUTy7/5UUgJljxXGMkBZCx0ihsYWqtdQLswTEB65v15Z7OzuPneW5Az2cHhsgKmVwMw2kHAdt20m2HSxQQTK2EYe15GPJ+XN2kgHIEk4tCjBpDGJhkRIOaRnPpsjqACHiSPt+SKgiVFjFdb3E0eti9wiEQfW8kci5JjDoOBl0dT0HoRVRFBH7AdICD4vhUwdosAQrmtJcu76be2/ZzA1rLiI4Mkt25WYaz/YyGVYpVSZw/AiJVYtBgRlDT9WuI+ka2EgtUNUqlf7TiEKVwcFBKiM9yMYO2jbdw3j7dfz81QLf2d1LX9SI3dCFHyRp1DxXYOuLC6AmiaqcIWloZW3p7+T+iwWfTCaDk7XRQbJsvBVHuFIQxz7++BTCn6TNDli/pIk7r1rFAzs2sGEmIcjMwTtAdORg6e2dek3W55kDHgfPFii7KcZDi1I1QMcajcKWSQYWSyWmoSKJp9colNC1mPGkpIRMYsjVnNh1UcshJ7REOimCQFENA2wnjfByTAWaZ48OEQcV/vyj18CmD4rVE0O6fPDQBRmBLkU7iPvWpNj+u+/Wzx6q8NjuAxzrH2esOEkxCAk1aJWlIdVAVCvki43YR1E4u/b63G2UgMi+cKEPy0ryt7m4aMdJUoIpgSN8bPvKZWF3XZdUKoXSNlJKMo6A2CXlxknE2mXQBuKfbG1ix1VNetvSFnYeOsOpwSkmypP4VU1oeVStWrJVpdBxjKVVLVDMSrpMNRNcz2Q81nEtNh2IYmwh5uWeb2pqIZNtpoJHKCy0Ci5hsSSdAM+zLiIAM25nJDkdhEvaslBE+DogVD4ugqwFy5Zk2NDZxPZ1S7hx83JuXXoJtbHbBUs36+7rA1KeQ+nUAYrTZ0lLhV1roYWeycNQuw4tIYoT5xpVpTDcT2VsktHpaRpyadquupGWD/6++MozJ/R/e+owh8dj0k0deEIgKqMsa8gwOTV1iUjR5P7nZZKuCQA1AZBAq5TIOESJiEBV0UEIOiIlJJaMCPwpuloyXL9mBTs2reDmta2szZ+rthfUyOUu4tdvWcGOG1fonYcrPPzsPoZLPmNBgbJfxYk1VmwRawhjhSOdWuuuiKVmZlEMS9UuNqkdSd6ymVvTYOmZC0jjyxBiH1kW5IVEE+KPjvLKaIFHr27X79nULezr302zn4aWhVMtnU8XiLs2p/Wtm2/kzDQcPlWkb3iUsYlJxgtlxoohMXLW5J8x8YUGZBJHH2sxOyiISqyYlCtod1IXjFI3WT4dsogjkoHLyNYQBdhWkVZ55aaAOh2f5W6RqrawLIu0JYi9Ep2epNmenxZ8MVZaiM/c3Ml9N3fqM+Nw4PgEvYMjTIchZydLBEoTRoooAKIZf5EkD61UEVpIIhGihMCaXWUaUgq6s2JeGTVRYYldQns2titRcYTgQstI1xKyoKM533HeYBnYTS5aheiwDCicJpdcrpXGhhxNKYcbN6xmY7dgS+4y/BrsTsHKrbpFC8o+TMQOpbCKRZjMAMyGdif12lERGQJSOsCJKmBpQlviNnXhrLma/M0f49/98Hn9nf2THCtCprWLtI7I6CJLcjEpUYY2Z3YAdf79J59xdOn7F1qScT18v0JFB4i0IO04pC2XBtcl40rWb7ieNcuauW5ZEiNx/nnE5ZilI6ADBUEEUQhKJaKtBThOLUXVRYp33m3pc9tIfeGVzHNeqY0p2BqWZ996h5RRkkUoXu/n5Rx3ZmrnrVrk4krF5V/p67icMrrccjx/+9e73xsiGNLokPLRI8mMWBgmQWm1s0ZRhFud4ORzP6JLlmmxywxOTjFid9F528eZXH0XP+mFv/zhLtJL1xMFAYWhfrYub+czH7yHuzfK171U3UL3/0brwWUJgMFguAiVM7ry9A/o3fMY1cFjtC1fTct1H2By+W18uzfHV585RslrZXxykpQ/zvWr2/nIXTdw7zUNb2gF7LeCd/zSYAbDL4z0CpG+88O6I9XIWN8J8ms3MdW5jZ8c8/nHl0/SMx7R2BpjVQts7Mjz0btu5n3XZH9pXn4wFoDBcGUIhzROpzg4WNb/59cf5cmTJbrWbWPo9DGuW93JJ+68hg9cl7niKejeLMYCMBiuBE5nMvHVmAEvQ1AZxB8+xY41nfzq3dv51Dbvl+rFn8EIgMFwBWlJw/3v3kFDcwt+scyvve9W3rv6l6vVn4vpAhgMbwHDtRmgX6b+/sUwAmAw1DH/c+bIMhgMl8UFAvD4448vahL09/fr3bt3z9tu90u7LtuUeOG55/Whg69d1nkOHz6sX3zxRX327OUllPjxj398WdsdP35c79u3T584ceKytn/kkUcua7vnnntODw4Ozm778ssv69OnT1/WvsPDw3rv3r368ccf1wcPHrxiptnIyMhlHe/ZZ5+dd63Dw8N6z549i+735JNPztvv9OnT+sCBA5d9/adPn9aPPPKI7unpWXSfY8eO6b17987bbnR0VO/bt++yzvfss89e1nZ79+7Ve195Wb+6f6/e8/JO/chPH150v6cfe+ay73nXC8/rJ372E33k0OHL3ufJJ5+ct+3evXsv6704ffq03r9/vz569OgF284bBOzr69N/+7d/i5RS33XXXZfsu/z4xz/m5z//Oe973/v0b/3WbwmA//xf/iP/ZOKf6Pe9/95L7vf1r/2t/va3v82ZM2doa2vjc5/7nP7Qh3/1ktu/+OKLfPGLX6S5uRmAG264Qf/bf/tvL7n9wMCA/ta3vsXy5cv11q1bL7ndv/pX/0o//PDDOI7D6tWr2bp1q/7X//pfL9hX+/73v0+5XNYPPvjgJbf7+c9/rv/9v//37Nixgz/5kz8B4Fvf+hY33ngjq1atWujw/If/8B/0D3/4QzzPo1Ao4Hkev/Ebv6F//dd//U33If/hH/6BoaEhtmzZcsltent79Z/92Z9x9dVX89u//dt63bp14tvf/jaTk5Ns3779kvsNDAzo//Sf/hMdHR184Qtf0GvWrBGPPvoozz77LH/zN3+z4HU9+eST+vd+7/dYtWoVY2NjrFixgnvuuUf/zu/8ziXv+fnnn+epp57ir//6r2e/++pXv4plWVxzzTULnu+P/uiP9KFDh5iYmNC/8iu/cslz/PXf/Hf9g+8/zLGjhxkdHWXLls3k83miSOn7H/jgRfd74vHn9de+9i3Wb9qqlyxtuuSxn9v1gv7Sf/rPnO3pIY4iGprbuXb7dfqf//N/Tltb2yX3+/73v6+//OUvc/DgQf17v/d7AuAv//Iv+bVf+zWWLFlyyXv++7//e/13f/d3BEHA0NAQX/jCF/QnP3kuh8U8C6BarXLgwAEGBwcveUCAiYkJdu7cyde//nVGR4Y0wKFDhzh79uyC+z3xxBOsWbOGV/buF9/4xjfYtGnTgtsfPnyY1tZWHnvsMfGFL3yBPXv28OKLL15S8crlMgcOHGBqamrB41qWxUc+8hF27dolrrvuOh555BGOHDmyoJLu37+fkydPLnjcwcFBDh48yAsvvMBTTz2lAY4dO7ZouTz22GP6scce44EHHuArX/kKTz31lPiLv/gLrrvuugX3u1xOnDjBmTNnFtymXC6zd+9edu3axY9+9CMAenp6OHz48IL7TUxMcPDgQV588UUeffRRIInhX6ysTp48qb/97W/zz/7ZP+NHP/qR+N73vsf73/9+fvKTn/Daa5e2Dtvb2zlw4ABzLZOnnnqKdDp9qV0AGBwc1E888QSVSmX2/i7FZ37zfxHf++53xN/+f1/ntttu47/+1//G97//Q3Gplx+gt7eHvfv3UfEvHdoL8K1vfpPW5ha+9KUv8cSzL4iPfexj9PX18cwzzyy4X09PD/v37+exxx6btWJee+21RZ/rwYMHWbZsGV/60pf42te+xq233jrv//MEIJVKza4UvBBNTU0sW7aMzs5OvvXtbwPQ2dUFiyW8EIIzvb2cOnVCt7V3io2brlpwh2KxOBvZdtVVVzE5ObngDc9su1jUne/7VCpJGHBDQwNdXV3z0qJfjGq1elkpvTZv3kxHRwc//OEPAchms4tez09/+lOampr4F//iX4glS5LUWVu3bhVbtmy5IiPImUyGhoaGBbcpl8t0dnZy/fXXs3v3bk6fPq2XLVu2aBITKSUdHR1s3LiRAwcO8Nxzz+nm5maWLbt4oosZent7ee655/jABz4AQFdXl7j99ts5cuQI+/fvv+R+9913n+jq6uL73/8+APv379elUok77rhjwfPt2bOHzZs38/nPf56RkRGOHTu2qOnsplPsf/Ug69atW/w5xFVUXCWXv3QQ1okzJ/WLzz3Ptm3bWLcpeba//hsPCd/3FxWAKIrYtGkTzc3Ns0K7ZMkSqous2KOU4uWXX2bXrl1s2rRJrFy5ct69zHvTwzBESrloRfd9n3Xr1vHQQw/xjW98gxdffF4vpsAAv/Vbv4Xruvzmb/4mv/u7n130ATiOQ6FQ4N/9u3+n/+zP/oyNGzdy9913X3J713VJp9OkUqkFj9vf389Xv/pV7r33Xv0P//AP3H333SzUZYCkonvewqHIWmu2bNnC3XffzcmTJ3n00Ud1NptdMKkFQKFQIJdLUlT/5V/+pb7//vv1fffdp7/85S9fsXGAxUKEJyYmaG5u5kMf+hBBEPDlL3+ZMAzJZi+SgHEOM9u8//3vRwjBd77zHfr6+shkMgvuF0UR5XKZtWvXzpb7hg0bRGtrK6Ojowvuu2PHDp5//nkg6Zp1d3cv+vx+/OMf09LSwoYNG5ienubJJ59c8BwAk+Ojiz67GSId4bgCKS797kyOTpNy02zbtm3e93EcL/oiR1HEli1buOuuu3j11Vf53ve+lySuWqSx/vznP8+2bdv44he/yO///u9fMOY1P2BPa1Kp1KKVJQgC8vk8999/v1izZg0/+MEPGBoaWrSVueWWHeIb3/iW+IM/+APGx8f5whf+YMEKnkqliOOY/v5+1q1bx+/8zu/Q3t5+yQcthEgSZCzSaq1atYoPf/jDfO5znwNYtPBhsdRUCVJKbNvm13/918WNN96YdJFGRymXywvu19raSj6fLAL5qU99ioceeohKpbJoV+ZyuZxUZNlsklnn9ttvF/fddx979uxh//79izYGmUyG8fFxbr/9du644w5OnjzJgQMHZpd2uxSe582K3lxc16W9vX3BfR988EG01jz22GP6ueee47777ltw+8OHD+tdu3ZRKBR44YUXAHj66acX3Acgk/LIZhZuTGaw0xlSGQ+tLl2XGvNNlMtVRscn5p8nk1n0nh3HQSnFQw89JDZs2MB3v/tdJicnFxWAtrY28aUvfUn81V/9FdVqlb/6q7+a9/95e/u+n2RUiRfOKBNFEaVSCYCHHnqIPXv2cOTIkUVb3hk+9KEHxbXXXsuRI0cW3M6yLJqbm/mLv/gL8Yd/+IfitttuW7QmVyqVRa9/fHyc7u5u7r//fvHxj3+cn//85wwMDCwoRtVqddHjlstlenp6AHjve9/Lnj176OvrW/RF7uzs5KmnnuLxxx/XnZ2d4pOf/KTI5/OMjIwsuN/rYbEuTlNTE8PDwwwMDOhPf/rTIpfL8eqrry4qXplMhtOnT7N27VqxY8cOhBCcPn160XuWUuK67mxLBvDCCy/o8fFxrr/++gX33bhxo8jlcnzzm99kZGSE97znPQtu/8orr+C6Lh0dHfT09LB69Wp6enoW7Qb4vk8YLixkMyiSxqdUKl5ym3XrVwmt9bx639vfp8fHxxcdw9Bac+LECQDe/e5309PTQ7lcvuwsU7fffrvYvn07x44dm/f9vM7p5s2bhWVZi5rzQRDQ2NgIwHvf+37x+ONP6qGhEaanL33zfX19+k//9E+pVCp0d3dz+PBhHnzwwQXP43nebMt4OViWhRBi0danqalptkV/4IEHePjhh3n66af55Cc/ecl9Vq9efdEWay62bdPRkSw3e8MNN4h/+k//qf7KV75Ca+vC6219/vOfF729vfr3f//32b59u65Wq/i+z9KlSxfc73KJomhRU75YLM4+U4A//uM/5jOf+cyi+01NTbF27Vp2796tb7jhBvEnf/In+nOf+xxtbQuvxrp+/XoefPBBvvjFL7Jz5049OTnJ4cOH+dSnPnVZfe6PfvSj/Pmf/zn33nsvM+Mml+Lhhx/mve99L//m3/wbATA0NKQ/+9nP8sMf/pA/+IM/uOR+HR1dpNNZTpw4oed2VS5Gcz6HijTZXONCm/HHf/xH/M3f/A1PP/203rZtG9//7vf48Ic/zMc+9rEF9xNCsGLFCgDe8573iBdeeEF/7WtfW3R26YMf/KDu7OzEcRwGBgZ44IEH5v3/gtGp3/iN31h09Pnee++dp/Cf/OQn2bhxIzfffPMl91m2bJn49Kc/rfv6+sjlctx000186lOfWrBQb7nlFpYvX77gtcylvb1dfPrTn9a33nrrgsd93/veNysSy5cvF5/4xCf01q1bFzz2xz/+cW677bYFt9mxY8e8wa+PfOQjOI6z6H4An/3sZ7npppuA5KVqaGjg4x//+BUZBLzjjjsWHb+4/vrrxW/+5m/q7u5uAYmA/emf/qleTIA3b94sPvOZz+gbbrhBANx4443iD//wD/ViA5/t7e3ioYce0t3d3eRyOaamprjzzju55557LuueduzYwWc/+1luueWWRbf92Mc+xpo1a2b/7uzsFB//+Mf13O8uRmNjI5/61KdY7OUHuO6aa/n0pz9Ne3vngtt+9KMfFa2trfrUqVNMT0/zx3/8x2zdunXRc9x+++3zZs0+/OEPs2rVKtauXbvgdf3Lf/kvGRoaolgsorXmzjvvnPd/4wpsMNQxxhXYYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOsYIgMFQxxgBMBjqGCMABkMdYwTAYKhjjAAYDHWMEQCDoY4xAmAw1DFGAAyGOub/B969U8LvoRicAAAAAElFTkSuQmCC" alt="Genesis Automation logo" class="h-24 md:h-28 w-auto object-contain mx-auto" />
+        </div>
+      </div>
+    </div>
 
-      {/* ============================= HEADER ============================= */}
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled ? "bg-[#0b0b0b]/70 backdrop-blur-xl border-b border-white/10" : "bg-transparent border-b border-transparent"
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between h-20">
-          <div className="flex items-center gap-3">
-            <GenesisMark size={34} />
-            <div className="leading-tight">
-              <p className="text-[13px] tracking-[0.28em] font-medium text-white">GENESIS AUTOMATION</p>
-              <p className="text-[10px] tracking-[0.2em] text-white/40 mt-0.5">INSPIRING INNOVATIONS</p>
-            </div>
+    <h1 class="reveal text-[11vw] leading-[1.02] sm:text-5xl lg:text-6xl font-light tracking-tight text-balance max-w-4xl mx-auto">
+      Designing Experiences,
+      <br class="hidden sm:block" />
+      <span class="text-white/40">Not Just Installing</span>
+      <span class="bg-clip-text text-transparent" style="background-image: linear-gradient(90deg, #007BFF, #E65100); -webkit-background-clip:text;">Devices.</span>
+    </h1>
+
+    <p class="reveal mt-8 text-lg text-white/50 max-w-xl mx-auto font-light leading-relaxed">
+      Where 15+ years of industrial-grade engineering meets everyday luxury living in Odisha.
+    </p>
+
+    <div class="reveal mt-12 flex flex-wrap items-center justify-center gap-4">
+      <a href="#ecosystem" class="group inline-flex items-center gap-2 bg-white text-[#0b0b0b] rounded-full px-7 py-3.5 text-sm font-medium hover:bg-[#007BFF] hover:text-white transition-all duration-300">
+        Explore Ecosystem
+        <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+      </a>
+      <a href="#contact" class="inline-flex items-center gap-2 border border-white/20 rounded-full px-7 py-3.5 text-sm font-medium text-white/80 hover:border-[#E65100] hover:text-white hover:glow-orange transition-all duration-300">
+        Schedule Demo
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= DIRECT CONNECT WIDGET ============================= -->
+<section class="px-6 lg:px-10 pb-24">
+  <div class="reveal max-w-4xl mx-auto grid sm:grid-cols-2 gap-5">
+    <a href="tel:+917008049055"
+       class="pulse-call group relative flex items-center gap-4 rounded-2xl border border-[#007BFF]/40 bg-white/[0.03] px-7 py-6 hover:bg-[#007BFF]/10 transition-colors duration-300">
+      <div class="w-12 h-12 rounded-full bg-[#007BFF]/15 border border-[#007BFF]/50 flex items-center justify-center shrink-0">
+        <i data-lucide="phone-call" class="w-5 h-5 text-[#007BFF]"></i>
+      </div>
+      <div class="text-left">
+        <p class="text-[11px] tracking-[0.2em] text-white/40">DIRECT CALL</p>
+        <p class="text-base font-medium mt-0.5">+91 70080 49055</p>
+      </div>
+      <i data-lucide="arrow-up-right" class="w-4 h-4 text-white/30 ml-auto group-hover:text-[#007BFF] transition-colors"></i>
+    </a>
+
+    <a href="https://wa.me/917008049055?text=Hi%20Genesis%20Team%2C%20I%20want%20to%20explore%20home%20automation%20options." target="_blank" rel="noopener"
+       class="ripple-wa group relative flex items-center gap-4 rounded-2xl border border-[#E65100]/40 bg-white/[0.03] px-7 py-6 hover:bg-[#E65100]/10 transition-colors duration-300">
+      <div class="w-12 h-12 rounded-full bg-[#E65100]/15 border border-[#E65100]/50 flex items-center justify-center shrink-0">
+        <i data-lucide="message-circle" class="w-5 h-5 text-[#E65100]"></i>
+      </div>
+      <div class="text-left">
+        <p class="text-[11px] tracking-[0.2em] text-white/40">WHATSAPP · AWAITING REPLY</p>
+        <p class="text-base font-medium mt-0.5">Chat with our team</p>
+      </div>
+      <i data-lucide="arrow-up-right" class="w-4 h-4 text-white/30 ml-auto group-hover:text-[#E65100] transition-colors"></i>
+    </a>
+  </div>
+</section>
+<!-- ============================= ECOSYSTEM ============================= -->
+<section id="ecosystem" class="px-6 lg:px-10 py-28 border-t border-white/[0.06]">
+  <div class="max-w-6xl mx-auto">
+    <div class="reveal">
+      <p class="text-[11px] tracking-[0.3em] text-[#007BFF]/70 mb-4">THE ECOSYSTEM</p>
+      <h2 class="text-4xl lg:text-5xl font-light tracking-tight max-w-2xl">Four hubs. One home, thinking as a whole.</h2>
+      <p class="mt-5 text-white/40 font-light max-w-xl">Tap any service below for full specifications and key features.</p>
+    </div>
+
+    <div class="mt-16 grid lg:grid-cols-2 gap-6" id="ecosystem-grid">
+      <!-- Hub 1 -->
+      <div class="reveal rounded-2xl border border-white/10 bg-white/[0.015] p-8">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="w-12 h-12 rounded-full border border-[#007BFF]/50 flex items-center justify-center text-[#007BFF] shrink-0">
+            <i data-lucide="sun" class="w-5 h-5"></i>
           </div>
-
-          <nav className="hidden lg:flex items-center gap-10">
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                onClick={(e) => {
-                  e.preventDefault();
-                  closeMenuAndScroll(link.href);
-                }}
-                className="text-[13px] tracking-wide text-white/60 hover:text-white transition-colors duration-300 relative group"
-              >
-                {link.label}
-                <span className="absolute -bottom-1 left-0 w-0 h-px bg-[#007BFF] transition-all duration-300 group-hover:w-full" />
-              </a>
-            ))}
-          </nav>
-
-          <div className="hidden lg:flex items-center">
-            <a
-              href="tel:+917008049055"
-              className="group flex items-center gap-2 border border-[#007BFF]/50 rounded-full px-5 py-2.5 text-[12px] tracking-wide text-white/90 hover:border-[#007BFF] hover:glow-blue transition-all duration-300"
-            >
-              <Phone size={14} className="text-[#007BFF]" />
-              <span>+91 70080 49055</span>
-            </a>
+          <div>
+            <p class="text-[11px] tracking-[0.2em] text-white/30">01</p>
+            <h3 class="text-xl font-normal">Ambiance</h3>
           </div>
-
-          <button
-            className="lg:hidden text-white/80"
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-label="Toggle menu"
-          >
-            {menuOpen ? <X size={22} /> : <Menu size={22} />}
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <button data-service="smart-lighting" class="service-card flex items-center gap-2 text-[13px] text-white/60 border border-white/10 hover:border-[#007BFF]/50 hover:text-white rounded-lg px-3 py-3 transition-all duration-300 text-left">
+            <i data-lucide="lightbulb" class="w-4 h-4 text-[#007BFF] shrink-0"></i><span>Smart Lighting</span>
+          </button>
+          <button data-service="hvac" class="service-card flex items-center gap-2 text-[13px] text-white/60 border border-white/10 hover:border-[#007BFF]/50 hover:text-white rounded-lg px-3 py-3 transition-all duration-300 text-left">
+            <i data-lucide="wind" class="w-4 h-4 text-[#007BFF] shrink-0"></i><span>HVAC Control</span>
+          </button>
+          <button data-service="curtains" class="service-card flex items-center gap-2 text-[13px] text-white/60 border border-white/10 hover:border-[#007BFF]/50 hover:text-white rounded-lg px-3 py-3 transition-all duration-300 text-left">
+            <i data-lucide="blinds" class="w-4 h-4 text-[#007BFF] shrink-0"></i><span>Motorized Curtains</span>
+          </button>
+          <button data-service="smart-glass" class="service-card flex items-center gap-2 text-[13px] text-white/60 border border-white/10 hover:border-[#007BFF]/50 hover:text-white rounded-lg px-3 py-3 transition-all duration-300 text-left">
+            <i data-lucide="square-stack" class="w-4 h-4 text-[#007BFF] shrink-0"></i><span>Smart Glass</span>
           </button>
         </div>
+      </div>
 
-        {menuOpen && (
-          <div className="lg:hidden bg-[#0b0b0b]/95 backdrop-blur-xl border-t border-white/10 px-6 py-6 flex flex-col gap-5">
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                onClick={(e) => {
-                  e.preventDefault();
-                  closeMenuAndScroll(link.href);
-                }}
-                className="text-sm tracking-wide text-white/70 hover:text-white"
-              >
-                {link.label}
-              </a>
-            ))}
-            <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
-              <a href="tel:+917008049055" className="text-sm text-white/80 flex items-center gap-2">
-                <Phone size={14} className="text-[#007BFF]" /> +91 70080 49055
-              </a>
-              <a href="tel:+919557744220" className="text-sm text-white/80 flex items-center gap-2">
-                <Phone size={14} className="text-[#E65100]" /> +91 95577 44220
-              </a>
-            </div>
-          </div>
-        )}
-      </header>
-
-      {/* ============================= HERO ============================= */}
-      <section className="relative pt-40 pb-28 px-6 lg:px-10 overflow-hidden">
-        <div
-          className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 blur-3xl"
-          style={{ background: "radial-gradient(circle, rgba(0,123,255,0.5) 0%, rgba(230,81,0,0.25) 45%, transparent 70%)" }}
-        />
-        <div className="max-w-6xl mx-auto relative">
-          <Reveal>
-            <p className="text-[11px] tracking-[0.3em] text-white/40 mb-8 flex items-center gap-2">
-              <span className="w-8 h-px bg-[#E65100]" /> ODISHA · INDUSTRIAL-GRADE HOME AUTOMATION
-            </p>
-          </Reveal>
-          <Reveal delay={100}>
-            <h1 className="text-[13vw] leading-[0.98] lg:text-[74px] font-light tracking-tight text-balance max-w-5xl">
-              Designing Experiences,
-              <br />
-              <span className="text-white/40">Not Just Installing</span>{" "}
-              <span
-                className="bg-clip-text text-transparent"
-                style={{ backgroundImage: "linear-gradient(90deg, #007BFF, #E65100)" }}
-              >
-                Devices.
-              </span>
-            </h1>
-          </Reveal>
-          <Reveal delay={200}>
-            <p className="mt-8 text-lg text-white/50 max-w-xl font-light leading-relaxed">
-              Where 15+ years of industrial-grade engineering meets everyday luxury living in Odisha.
-            </p>
-          </Reveal>
-          <Reveal delay={300}>
-            <div className="mt-12 flex flex-wrap items-center gap-4">
-              <a
-                href="#ecosystem"
-                onClick={(e) => {
-                  e.preventDefault();
-                  closeMenuAndScroll("#ecosystem");
-                }}
-                className="group inline-flex items-center gap-2 bg-white text-[#0b0b0b] rounded-full px-7 py-3.5 text-sm font-medium hover:bg-[#007BFF] hover:text-white transition-all duration-300"
-              >
-                Explore Ecosystem
-                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-              </a>
-              <a
-                href="#contact"
-                onClick={(e) => {
-                  e.preventDefault();
-                  closeMenuAndScroll("#contact");
-                }}
-                className="inline-flex items-center gap-2 border border-white/20 rounded-full px-7 py-3.5 text-sm font-medium text-white/80 hover:border-[#E65100] hover:text-white hover:glow-orange transition-all duration-300"
-              >
-                Schedule Demo
-              </a>
-            </div>
-          </Reveal>
-        </div>
-
-        {/* ambient architecture visual slot */}
-        <Reveal delay={400}>
-          <div className="max-w-6xl mx-auto mt-20 relative">
-            <div className="relative rounded-2xl border border-white/10 overflow-hidden h-[340px] lg:h-[460px] bg-gradient-to-br from-white/[0.04] to-transparent">
-              <div
-                className="absolute inset-0 opacity-60"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(135deg, rgba(0,123,255,0.12) 0%, transparent 40%, rgba(230,81,0,0.10) 100%)",
-                }}
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center px-6">
-                  <GenesisMark size={54} />
-                  <p className="mt-4 text-[11px] tracking-[0.3em] text-white/30">
-                    A HOME, RUNNING ON A SINGLE INTELLIGENCE
-                  </p>
-                </div>
-              </div>
-              <div className="absolute bottom-6 left-6 right-6 flex justify-between text-[10px] tracking-[0.2em] text-white/25">
-                <span>ARCHITECTURE · LIGHT · CONTROL</span>
-                <span>BHUBANESWAR, ODISHA</span>
-              </div>
-            </div>
-          </div>
-        </Reveal>
-      </section>
-
-      {/* ============================= ECOSYSTEM ============================= */}
-      <section id="ecosystem" className="px-6 lg:px-10 py-28 border-t border-white/[0.06]">
-        <div className="max-w-6xl mx-auto">
-          <Reveal>
-            <p className="text-[11px] tracking-[0.3em] text-[#007BFF]/70 mb-4">THE ECOSYSTEM</p>
-            <h2 className="text-4xl lg:text-5xl font-light tracking-tight max-w-2xl">
-              Four hubs. One home, thinking as a whole.
-            </h2>
-          </Reveal>
-
-          <div className="mt-16 grid lg:grid-cols-2 gap-5">
-            {HUBS.map((hub, i) => {
-              const HubIcon = hub.icon;
-              const isActive = activeHub === i;
-              const accentColor = hub.accent === "blue" ? "#007BFF" : "#E65100";
-              return (
-                <Reveal key={hub.id} delay={i * 80}>
-                  <button
-                    onClick={() => setActiveHub(i)}
-                    className={`w-full text-left rounded-xl border p-8 transition-all duration-500 group ${
-                      isActive
-                        ? hub.accent === "blue"
-                          ? "border-[#007BFF]/50 glow-blue bg-white/[0.03]"
-                          : "border-[#E65100]/50 glow-orange bg-white/[0.03]"
-                        : "border-white/10 hover:border-white/25 bg-white/[0.015]"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-4">
-                        <div
-                          className="w-12 h-12 rounded-full flex items-center justify-center border transition-colors duration-500"
-                          style={{
-                            borderColor: isActive ? accentColor : "rgba(255,255,255,0.15)",
-                            color: isActive ? accentColor : "rgba(255,255,255,0.6)",
-                          }}
-                        >
-                          <HubIcon size={20} />
-                        </div>
-                        <div>
-                          <p className="text-[11px] tracking-[0.2em] text-white/30">{hub.index}</p>
-                          <h3 className="text-xl font-normal mt-0.5">{hub.label}</h3>
-                        </div>
-                      </div>
-                      <ChevronRight
-                        size={18}
-                        className={`mt-2 transition-transform duration-500 text-white/30 ${
-                          isActive ? "rotate-90" : "group-hover:translate-x-1"
-                        }`}
-                      />
-                    </div>
-
-                    <p className="mt-5 text-sm text-white/45 font-light max-w-md">{hub.blurb}</p>
-
-                    <div
-                      className={`grid grid-cols-2 gap-3 overflow-hidden transition-all duration-500 ${
-                        isActive ? "max-h-40 opacity-100 mt-6" : "max-h-0 opacity-0 mt-0"
-                      }`}
-                    >
-                      {hub.items.map((item) => {
-                        const ItemIcon = item.icon;
-                        return (
-                          <div
-                            key={item.name}
-                            className="flex items-center gap-2 text-[13px] text-white/60 border border-white/10 rounded-lg px-3 py-2.5"
-                          >
-                            <ItemIcon size={14} style={{ color: accentColor }} />
-                            <span>{item.name}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </button>
-                </Reveal>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ============================= HARDWARE VAULT ============================= */}
-      <section id="vault" className="px-6 lg:px-10 py-28 border-t border-white/[0.06] bg-white/[0.015]">
-        <div className="max-w-6xl mx-auto">
-          <Reveal>
-            <p className="text-[11px] tracking-[0.3em] text-[#E65100]/70 mb-4">THE HARDWARE VAULT</p>
-            <h2 className="text-4xl lg:text-5xl font-light tracking-tight max-w-2xl">
-              Engineering credentials, not just brand names.
-            </h2>
-          </Reveal>
-
-          <Reveal delay={120}>
-            <div className="mt-12 inline-flex border border-white/10 rounded-full p-1 bg-black/40">
-              <button
-                onClick={() => setVaultTab("wired")}
-                className={`px-6 py-2.5 rounded-full text-[12px] tracking-[0.15em] transition-all duration-300 ${
-                  vaultTab === "wired" ? "bg-[#007BFF] text-white" : "text-white/50 hover:text-white/80"
-                }`}
-              >
-                WIRED ARCHITECTURE
-              </button>
-              <button
-                onClick={() => setVaultTab("wireless")}
-                className={`px-6 py-2.5 rounded-full text-[12px] tracking-[0.15em] transition-all duration-300 ${
-                  vaultTab === "wireless" ? "bg-[#E65100] text-white" : "text-white/50 hover:text-white/80"
-                }`}
-              >
-                WIRELESS FREEDOM
-              </button>
-            </div>
-          </Reveal>
-
-          <div className="mt-10">
-            {vaultTab === "wired" ? (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                {WIRED_BRANDS.map((brand, i) => (
-                  <Reveal key={brand.name} delay={i * 60}>
-                    <div className="border border-white/10 hover:border-[#007BFF]/50 hover:glow-blue rounded-xl px-5 py-8 text-center transition-all duration-400 h-full flex flex-col items-center justify-center gap-2 bg-black/20">
-                      <p className="text-lg font-medium tracking-wide">{brand.name}</p>
-                      <p className="text-[11px] text-white/35 font-light">{brand.tag}</p>
-                    </div>
-                  </Reveal>
-                ))}
-              </div>
-            ) : (
-              <div className="grid sm:grid-cols-2 gap-4 max-w-3xl">
-                {WIRELESS_BRANDS.map((brand, i) => (
-                  <Reveal key={brand.name} delay={i * 60}>
-                    <div className="border border-white/10 hover:border-[#E65100]/50 hover:glow-orange rounded-xl px-6 py-10 text-center transition-all duration-400 bg-black/20">
-                      <p className="text-xl font-medium tracking-wide">{brand.name}</p>
-                      <p className="text-[11px] text-white/35 font-light mt-1">{brand.tag}</p>
-                    </div>
-                  </Reveal>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* ============================= INDUSTRIAL CORE ============================= */}
-      <section id="core" className="px-6 lg:px-10 py-28 border-t border-white/[0.06]">
-        <div className="max-w-6xl mx-auto">
-          <Reveal>
-            <p className="text-[11px] tracking-[0.3em] text-[#007BFF]/70 mb-4">INDUSTRIAL CORE</p>
-            <h2 className="text-4xl lg:text-5xl font-light tracking-tight max-w-2xl">
-              From factory floors to living rooms.
-            </h2>
-            <p className="mt-6 text-white/45 font-light max-w-2xl leading-relaxed">
-              15+ years spent making industrial automation efficient, resilient, and safe — that same
-              discipline now governs how your home manages light, energy, and access. Genesis brings
-              factory-grade reliability into spaces built for living, not manufacturing.
-            </p>
-          </Reveal>
-
-          <div className="mt-16 grid lg:grid-cols-2 gap-5">
-            <Reveal>
-              <div className="border border-white/10 rounded-2xl p-8 h-full">
-                <p className="text-[11px] tracking-[0.2em] text-white/35 mb-6">TRADITIONAL HOME · STRESS</p>
-                <ul className="space-y-4">
-                  {STRESS.map((s) => (
-                    <li key={s} className="flex items-start gap-3 text-sm text-white/50 font-light">
-                      <XCircle size={16} className="text-white/25 shrink-0 mt-0.5" />
-                      <span>{s}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </Reveal>
-            <Reveal delay={120}>
-              <div className="border border-[#007BFF]/30 rounded-2xl p-8 h-full glow-blue">
-                <p className="text-[11px] tracking-[0.2em] text-[#007BFF]/70 mb-6">GENESIS SMART HOME · PEACE OF MIND</p>
-                <ul className="space-y-4">
-                  {PEACE.map((s) => (
-                    <li key={s} className="flex items-start gap-3 text-sm text-white/75 font-light">
-                      <CheckCircle2 size={16} className="text-[#007BFF] shrink-0 mt-0.5" />
-                      <span>{s}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </Reveal>
-          </div>
-
-          <Reveal delay={200}>
-            <div className="mt-6 grid sm:grid-cols-2 gap-5">
-              <div className="border border-white/10 rounded-2xl p-8 flex items-start gap-4">
-                <div className="w-11 h-11 rounded-full border border-[#E65100]/40 flex items-center justify-center shrink-0">
-                  <HeartHandshake size={18} className="text-[#E65100]" />
-                </div>
-                <div>
-                  <p className="font-normal">Elderly & convalescent friendly</p>
-                  <p className="text-sm text-white/40 font-light mt-1.5 leading-relaxed">
-                    Voice, single-touch, and automatic scenes designed so ease of use never depends on ease of learning.
-                  </p>
-                </div>
-              </div>
-              <div className="border border-white/10 rounded-2xl p-8 flex items-start gap-4">
-                <div className="w-11 h-11 rounded-full border border-[#007BFF]/40 flex items-center justify-center shrink-0">
-                  <Baby size={18} className="text-[#007BFF]" />
-                </div>
-                <div>
-                  <p className="font-normal">Child-safe by design</p>
-                  <p className="text-sm text-white/40 font-light mt-1.5 leading-relaxed">
-                    Curtain motors, gate logic, and access control engineered with fail-safes for the smallest members of the house.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ============================= TRUST WALL ============================= */}
-      <section id="trust" className="py-28 border-t border-white/[0.06] bg-white/[0.015] overflow-hidden">
-        <div className="max-w-6xl mx-auto px-6 lg:px-10">
-          <Reveal>
-            <p className="text-[11px] tracking-[0.3em] text-[#E65100]/70 mb-4 text-center">WALL OF TRUST</p>
-            <h2 className="text-3xl lg:text-4xl font-light tracking-tight text-center">
-              Trusted by institutions that cannot afford failure.
-            </h2>
-          </Reveal>
-        </div>
-
-        <div className="mt-16 space-y-6">
-          <div className="flex overflow-hidden">
-            <div className="flex gap-4 animate-marquee-left shrink-0">
-              {[...TRUST_LOGOS, ...TRUST_LOGOS].map((name, i) => (
-                <div
-                  key={`${name}-${i}`}
-                  className="border border-white/10 rounded-full px-8 py-4 text-sm text-white/50 whitespace-nowrap tracking-wide"
-                >
-                  {name}
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="flex overflow-hidden">
-            <div className="flex gap-4 animate-marquee-right shrink-0">
-              {[...TRUST_LOGOS.slice().reverse(), ...TRUST_LOGOS.slice().reverse()].map((name, i) => (
-                <div
-                  key={`${name}-r-${i}`}
-                  className="border border-white/10 rounded-full px-8 py-4 text-sm text-white/40 whitespace-nowrap tracking-wide"
-                >
-                  {name}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ============================= CONTACT / CONSULTATION ============================= */}
-      <section id="contact" className="px-6 lg:px-10 py-28 border-t border-white/[0.06]">
-        <div className="max-w-3xl mx-auto">
-          <Reveal>
-            <p className="text-[11px] tracking-[0.3em] text-[#007BFF]/70 mb-4 text-center">BEGIN A CONSULTATION</p>
-            <h2 className="text-4xl font-light tracking-tight text-center text-balance">
-              Tell us about the space. We'll design the intelligence.
-            </h2>
-          </Reveal>
-
-          <Reveal delay={120}>
-            <div className="mt-14 border border-white/10 rounded-2xl p-8 lg:p-10 bg-white/[0.02]">
-              {submitted ? (
-                <div className="text-center py-10">
-                  <CheckCircle2 size={40} className="text-[#007BFF] mx-auto mb-5" />
-                  <h3 className="text-2xl font-light">Consultation request received.</h3>
-                  <p className="text-white/45 font-light mt-3 max-w-md mx-auto">
-                    A Genesis design consultant will reach out to {form.name.split(" ")[0] || "you"} shortly to
-                    discuss the {form.propertyType.toLowerCase() || "space"} in {form.city || "your city"}.
-                  </p>
-                  <button
-                    onClick={() => {
-                      setSubmitted(false);
-                      setStep(1);
-                      setForm({ propertyType: "", interest: "", name: "", phone: "", city: "" });
-                    }}
-                    className="mt-8 text-sm text-[#007BFF] hover:underline"
-                  >
-                    Submit another request
-                  </button>
-                </div>
-              ) : (
-                <>
-                  {/* progress */}
-                  <div className="flex items-center gap-2 mb-10">
-                    {[1, 2, 3].map((s) => (
-                      <div key={s} className="flex-1 flex items-center gap-2">
-                        <div
-                          className={`w-7 h-7 rounded-full border flex items-center justify-center text-[11px] transition-colors duration-300 shrink-0 ${
-                            step >= s
-                              ? "border-[#007BFF] bg-[#007BFF]/10 text-[#007BFF]"
-                              : "border-white/15 text-white/30"
-                          }`}
-                        >
-                          {s}
-                        </div>
-                        {s < 3 && (
-                          <div className={`h-px flex-1 ${step > s ? "bg-[#007BFF]/50" : "bg-white/10"}`} />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  {step === 1 && (
-                    <div>
-                      <p className="text-sm tracking-wide text-white/40 mb-6">STEP 1 — PROPERTY TYPE</p>
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        {PROPERTY_TYPES.map((p) => {
-                          const PIcon = p.icon;
-                          const active = form.propertyType === p.label;
-                          return (
-                            <button
-                              key={p.label}
-                              onClick={() => setForm((f) => ({ ...f, propertyType: p.label }))}
-                              className={`flex items-center gap-3 rounded-xl border px-5 py-5 text-left transition-all duration-300 ${
-                                active
-                                  ? "border-[#007BFF]/60 glow-blue bg-[#007BFF]/5"
-                                  : "border-white/10 hover:border-white/25"
-                              }`}
-                            >
-                              <PIcon size={18} className={active ? "text-[#007BFF]" : "text-white/50"} />
-                              <span className="text-sm">{p.label}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                      <div className="mt-10 flex justify-end">
-                        <button
-                          disabled={!canAdvanceStep1}
-                          onClick={() => setStep(2)}
-                          className={`inline-flex items-center gap-2 rounded-full px-7 py-3 text-sm transition-all duration-300 ${
-                            canAdvanceStep1
-                              ? "bg-white text-[#0b0b0b] hover:bg-[#007BFF] hover:text-white"
-                              : "bg-white/10 text-white/30 cursor-not-allowed"
-                          }`}
-                        >
-                          Continue <ArrowRight size={15} />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {step === 2 && (
-                    <div>
-                      <p className="text-sm tracking-wide text-white/40 mb-6">STEP 2 — KEY INTEREST</p>
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        {INTERESTS.map((p) => {
-                          const PIcon = p.icon;
-                          const active = form.interest === p.label;
-                          return (
-                            <button
-                              key={p.label}
-                              onClick={() => setForm((f) => ({ ...f, interest: p.label }))}
-                              className={`flex items-center gap-3 rounded-xl border px-5 py-5 text-left transition-all duration-300 ${
-                                active
-                                  ? "border-[#E65100]/60 glow-orange bg-[#E65100]/5"
-                                  : "border-white/10 hover:border-white/25"
-                              }`}
-                            >
-                              <PIcon size={18} className={active ? "text-[#E65100]" : "text-white/50"} />
-                              <span className="text-sm">{p.label}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                      <div className="mt-10 flex justify-between">
-                        <button
-                          onClick={() => setStep(1)}
-                          className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm text-white/50 hover:text-white transition-colors"
-                        >
-                          <ChevronLeft size={15} /> Back
-                        </button>
-                        <button
-                          disabled={!canAdvanceStep2}
-                          onClick={() => setStep(3)}
-                          className={`inline-flex items-center gap-2 rounded-full px-7 py-3 text-sm transition-all duration-300 ${
-                            canAdvanceStep2
-                              ? "bg-white text-[#0b0b0b] hover:bg-[#007BFF] hover:text-white"
-                              : "bg-white/10 text-white/30 cursor-not-allowed"
-                          }`}
-                        >
-                          Continue <ArrowRight size={15} />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {step === 3 && (
-                    <form onSubmit={handleSubmit}>
-                      <p className="text-sm tracking-wide text-white/40 mb-6">STEP 3 — YOUR DETAILS</p>
-                      <div className="space-y-4">
-                        <input
-                          type="text"
-                          placeholder="Full name"
-                          value={form.name}
-                          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                          className="w-full bg-transparent border border-white/15 focus:border-[#007BFF] rounded-lg px-5 py-3.5 text-sm outline-none transition-colors placeholder:text-white/25"
-                        />
-                        <input
-                          type="tel"
-                          placeholder="Phone number"
-                          value={form.phone}
-                          onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                          className="w-full bg-transparent border border-white/15 focus:border-[#007BFF] rounded-lg px-5 py-3.5 text-sm outline-none transition-colors placeholder:text-white/25"
-                        />
-                        <input
-                          type="text"
-                          placeholder="City / Location"
-                          value={form.city}
-                          onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
-                          className="w-full bg-transparent border border-white/15 focus:border-[#007BFF] rounded-lg px-5 py-3.5 text-sm outline-none transition-colors placeholder:text-white/25"
-                        />
-                      </div>
-                      <div className="mt-10 flex justify-between">
-                        <button
-                          type="button"
-                          onClick={() => setStep(2)}
-                          className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm text-white/50 hover:text-white transition-colors"
-                        >
-                          <ChevronLeft size={15} /> Back
-                        </button>
-                        <button
-                          type="submit"
-                          disabled={!canSubmit}
-                          className={`inline-flex items-center gap-2 rounded-full px-7 py-3 text-sm transition-all duration-300 ${
-                            canSubmit
-                              ? "bg-[#007BFF] text-white hover:bg-[#007BFF]/90 glow-blue"
-                              : "bg-white/10 text-white/30 cursor-not-allowed"
-                          }`}
-                        >
-                          Submit Request <ArrowUpRight size={15} />
-                        </button>
-                      </div>
-                    </form>
-                  )}
-                </>
-              )}
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ============================= FOOTER ============================= */}
-      <footer className="border-t border-white/[0.06] px-6 lg:px-10 py-14">
-        <div className="max-w-6xl mx-auto grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
-          <div>
-            <div className="flex items-center gap-3">
-              <GenesisMark size={30} />
-              <div>
-                <p className="text-[12px] tracking-[0.25em]">GENESIS AUTOMATION</p>
-                <p className="text-[10px] tracking-[0.2em] text-white/35 mt-0.5">INSPIRING INNOVATIONS</p>
-              </div>
-            </div>
+      <!-- Hub 2 -->
+      <div class="reveal rounded-2xl border border-white/10 bg-white/[0.015] p-8">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="w-12 h-12 rounded-full border border-[#E65100]/50 flex items-center justify-center text-[#E65100] shrink-0">
+            <i data-lucide="key-round" class="w-5 h-5"></i>
           </div>
           <div>
-            <p className="text-[11px] tracking-[0.2em] text-white/35 mb-4">HEADQUARTERS</p>
-            <p className="text-sm text-white/55 font-light leading-relaxed flex items-start gap-2">
-              <MapPin size={15} className="shrink-0 mt-0.5 text-[#E65100]" />
-              67, K5, HIG, Kalinga Vihar, Bhubaneswar, Odisha-751019
-            </p>
-          </div>
-          <div>
-            <p className="text-[11px] tracking-[0.2em] text-white/35 mb-4">REACH US</p>
-            <div className="space-y-2.5 text-sm text-white/55 font-light">
-              <p className="flex items-center gap-2">
-                <Mail size={15} className="text-[#007BFF]" /> hello@genesisautomations.in
-              </p>
-              <p className="flex items-center gap-2">
-                <Globe size={15} className="text-[#007BFF]" /> www.genesisautomations.in
-              </p>
-              <p className="flex items-center gap-2">
-                <Phone size={15} className="text-[#E65100]" /> +91 70080 49055
-              </p>
-              <p className="flex items-center gap-2">
-                <Phone size={15} className="text-[#E65100]" /> +91 95577 44220
-              </p>
-            </div>
-          </div>
-          <div>
-            <p className="text-[11px] tracking-[0.2em] text-white/35 mb-4">NAVIGATE</p>
-            <div className="flex flex-col gap-2.5">
-              {NAV_LINKS.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    closeMenuAndScroll(link.href);
-                  }}
-                  className="text-sm text-white/55 font-light hover:text-white transition-colors"
-                >
-                  {link.label}
-                </a>
-              ))}
-            </div>
+            <p class="text-[11px] tracking-[0.2em] text-white/30">02</p>
+            <h3 class="text-xl font-normal">Security &amp; Access</h3>
           </div>
         </div>
-        <div className="max-w-6xl mx-auto mt-12 pt-8 border-t border-white/[0.06] flex flex-col sm:flex-row justify-between gap-3 text-[11px] text-white/25 tracking-wide">
-          <p>© {new Date().getFullYear()} Genesis Automation. All rights reserved.</p>
-          <p>Industrial-grade engineering, for the home.</p>
+        <div class="grid grid-cols-2 gap-3">
+          <button data-service="video-door" class="service-card flex items-center gap-2 text-[13px] text-white/60 border border-white/10 hover:border-[#E65100]/50 hover:text-white rounded-lg px-3 py-3 transition-all duration-300 text-left">
+            <i data-lucide="video" class="w-4 h-4 text-[#E65100] shrink-0"></i><span>IP Video Door Phones</span>
+          </button>
+          <button data-service="smart-locks" class="service-card flex items-center gap-2 text-[13px] text-white/60 border border-white/10 hover:border-[#E65100]/50 hover:text-white rounded-lg px-3 py-3 transition-all duration-300 text-left">
+            <i data-lucide="lock" class="w-4 h-4 text-[#E65100] shrink-0"></i><span>Smart Locks</span>
+          </button>
+          <button data-service="motorized-gates" class="service-card flex items-center gap-2 text-[13px] text-white/60 border border-white/10 hover:border-[#E65100]/50 hover:text-white rounded-lg px-3 py-3 transition-all duration-300 text-left">
+            <i data-lucide="door-closed" class="w-4 h-4 text-[#E65100] shrink-0"></i><span>Motorized Gates</span>
+          </button>
+          <button data-service="burglar-alarms" class="service-card flex items-center gap-2 text-[13px] text-white/60 border border-white/10 hover:border-[#E65100]/50 hover:text-white rounded-lg px-3 py-3 transition-all duration-300 text-left">
+            <i data-lucide="bell-ring" class="w-4 h-4 text-[#E65100] shrink-0"></i><span>Burglar Alarms</span>
+          </button>
         </div>
-      </footer>
+      </div>
+
+      <!-- Hub 3 -->
+      <div class="reveal rounded-2xl border border-white/10 bg-white/[0.015] p-8">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="w-12 h-12 rounded-full border border-[#007BFF]/50 flex items-center justify-center text-[#007BFF] shrink-0">
+            <i data-lucide="cable" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <p class="text-[11px] tracking-[0.2em] text-white/30">03</p>
+            <h3 class="text-xl font-normal">Infrastructure</h3>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <button data-service="wired-automation" class="service-card flex items-center gap-2 text-[13px] text-white/60 border border-white/10 hover:border-[#007BFF]/50 hover:text-white rounded-lg px-3 py-3 transition-all duration-300 text-left">
+            <i data-lucide="cable" class="w-4 h-4 text-[#007BFF] shrink-0"></i><span>Wired Automation</span>
+          </button>
+          <button data-service="wireless-automation" class="service-card flex items-center gap-2 text-[13px] text-white/60 border border-white/10 hover:border-[#007BFF]/50 hover:text-white rounded-lg px-3 py-3 transition-all duration-300 text-left">
+            <i data-lucide="waves" class="w-4 h-4 text-[#007BFF] shrink-0"></i><span>Wireless Automation</span>
+          </button>
+          <button data-service="water-level" class="service-card flex items-center gap-2 text-[13px] text-white/60 border border-white/10 hover:border-[#007BFF]/50 hover:text-white rounded-lg px-3 py-3 transition-all duration-300 text-left col-span-2">
+            <i data-lucide="gauge" class="w-4 h-4 text-[#007BFF] shrink-0"></i><span>Water Level Controllers</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Hub 4 -->
+      <div class="reveal rounded-2xl border border-white/10 bg-white/[0.015] p-8">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="w-12 h-12 rounded-full border border-[#E65100]/50 flex items-center justify-center text-[#E65100] shrink-0">
+            <i data-lucide="clapperboard" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <p class="text-[11px] tracking-[0.2em] text-white/30">04</p>
+            <h3 class="text-xl font-normal">Entertainment</h3>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <button data-service="home-cinema" class="service-card flex items-center gap-2 text-[13px] text-white/60 border border-white/10 hover:border-[#E65100]/50 hover:text-white rounded-lg px-3 py-3 transition-all duration-300 text-left">
+            <i data-lucide="clapperboard" class="w-4 h-4 text-[#E65100] shrink-0"></i><span>Home Cinema</span>
+          </button>
+          <button data-service="multi-zone-audio" class="service-card flex items-center gap-2 text-[13px] text-white/60 border border-white/10 hover:border-[#E65100]/50 hover:text-white rounded-lg px-3 py-3 transition-all duration-300 text-left">
+            <i data-lucide="speaker" class="w-4 h-4 text-[#E65100] shrink-0"></i><span>Multi-Zone Audio</span>
+          </button>
+        </div>
+      </div>
     </div>
-  );
-}
+  </div>
+</section>
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<GenesisAutomation />);
+<!-- ============================= SERVICE MODAL ============================= -->
+<div id="service-modal" class="modal-backdrop fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm px-4 py-6">
+  <div class="modal-card relative w-full max-w-lg bg-[#111111] border border-white/10 rounded-2xl p-8 max-h-[85vh] overflow-y-auto">
+    <button id="modal-close" class="absolute top-5 right-5 text-white/40 hover:text-white transition-colors" aria-label="Close">
+      <i data-lucide="x" class="w-5 h-5"></i>
+    </button>
+    <div id="modal-icon" class="w-12 h-12 rounded-full border flex items-center justify-center mb-5"></div>
+    <p id="modal-eyebrow" class="text-[11px] tracking-[0.2em] text-white/35 mb-2"></p>
+    <h3 id="modal-title" class="text-2xl font-normal mb-3"></h3>
+    <p id="modal-tagline" class="text-sm text-white/50 font-light leading-relaxed mb-6"></p>
+    <p class="text-[11px] tracking-[0.2em] text-white/35 mb-3">KEY FEATURES</p>
+    <ul id="modal-features" class="space-y-3 mb-2"></ul>
+    <button id="modal-cta" class="mt-7 w-full inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium bg-white text-[#0b0b0b] hover:bg-[#007BFF] hover:text-white transition-all duration-300">
+      Enquire About This <i data-lucide="arrow-right" class="w-4 h-4"></i>
+    </button>
+  </div>
+</div>
+<!-- ============================= HARDWARE VAULT ============================= -->
+<section id="vault" class="px-6 lg:px-10 py-28 border-t border-white/[0.06] bg-white/[0.015]">
+  <div class="max-w-6xl mx-auto">
+    <div class="reveal">
+      <p class="text-[11px] tracking-[0.3em] text-[#E65100]/70 mb-4">THE HARDWARE VAULT</p>
+      <h2 class="text-4xl lg:text-5xl font-light tracking-tight max-w-2xl">Engineering credentials, not just brand names.</h2>
+    </div>
+
+    <div class="reveal mt-12 inline-flex border border-white/10 rounded-full p-1 bg-black/40">
+      <button id="tab-wired" class="vault-tab px-6 py-2.5 rounded-full text-[12px] tracking-[0.15em] transition-all duration-300 bg-[#007BFF] text-white">
+        WIRED ARCHITECTURE
+      </button>
+      <button id="tab-wireless" class="vault-tab px-6 py-2.5 rounded-full text-[12px] tracking-[0.15em] transition-all duration-300 text-white/50 hover:text-white/80">
+        WIRELESS FREEDOM
+      </button>
+    </div>
+
+    <div class="mt-10">
+      <div id="vault-wired" class="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="reveal border border-white/10 hover:border-[#007BFF]/50 hover:glow-blue rounded-xl px-5 py-8 text-center transition-all duration-400 bg-black/20">
+          <p class="text-lg font-medium tracking-wide">Schneider Electric</p>
+          <p class="text-[11px] text-white/35 font-light mt-1">Electric Infrastructure</p>
+        </div>
+        <div class="reveal border border-white/10 hover:border-[#007BFF]/50 hover:glow-blue rounded-xl px-5 py-8 text-center transition-all duration-400 bg-black/20">
+          <p class="text-lg font-medium tracking-wide">Havells</p>
+          <p class="text-[11px] text-white/35 font-light mt-1">Power &amp; Switching</p>
+        </div>
+        <div class="reveal border border-white/10 hover:border-[#007BFF]/50 hover:glow-blue rounded-xl px-5 py-8 text-center transition-all duration-400 bg-black/20">
+          <p class="text-lg font-medium tracking-wide">Legrand</p>
+          <p class="text-[11px] text-white/35 font-light mt-1">Wiring Devices</p>
+        </div>
+        <div class="reveal border border-white/10 hover:border-[#007BFF]/50 hover:glow-blue rounded-xl px-5 py-8 text-center transition-all duration-400 bg-black/20">
+          <p class="text-lg font-medium tracking-wide">ABB</p>
+          <p class="text-[11px] text-white/35 font-light mt-1">Industrial Automation</p>
+        </div>
+        <div class="reveal border border-white/10 hover:border-[#007BFF]/50 hover:glow-blue rounded-xl px-5 py-8 text-center transition-all duration-400 bg-black/20">
+          <p class="text-lg font-medium tracking-wide">Ekinex</p>
+          <p class="text-[11px] text-white/35 font-light mt-1">KNX Design Systems</p>
+        </div>
+      </div>
+
+      <div id="vault-wireless" class="hidden grid sm:grid-cols-2 gap-4 max-w-3xl">
+        <div class="reveal border border-white/10 hover:border-[#E65100]/50 hover:glow-orange rounded-xl px-6 py-10 text-center transition-all duration-400 bg-black/20">
+          <p class="text-xl font-medium tracking-wide">JR</p>
+          <p class="text-[11px] text-white/35 font-light mt-1">Loft Glass &amp; Metal Series</p>
+        </div>
+        <div class="reveal border border-white/10 hover:border-[#E65100]/50 hover:glow-orange rounded-xl px-6 py-10 text-center transition-all duration-400 bg-black/20">
+          <p class="text-xl font-medium tracking-wide">Smart Node</p>
+          <p class="text-[11px] text-white/35 font-light mt-1">Acrylic &amp; Glass Finish</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= INDUSTRIAL CORE ============================= -->
+<section id="core" class="px-6 lg:px-10 py-28 border-t border-white/[0.06]">
+  <div class="max-w-6xl mx-auto">
+    <div class="reveal">
+      <p class="text-[11px] tracking-[0.3em] text-[#007BFF]/70 mb-4">INDUSTRIAL CORE</p>
+      <h2 class="text-4xl lg:text-5xl font-light tracking-tight max-w-2xl">From factory floors to living rooms.</h2>
+      <p class="mt-6 text-white/45 font-light max-w-2xl leading-relaxed">
+        15+ years spent making industrial automation efficient, resilient, and safe — that same discipline
+        now governs how your home manages light, energy, and access. Genesis brings factory-grade
+        reliability into spaces built for living, not manufacturing.
+      </p>
+    </div>
+
+    <div class="mt-16 grid lg:grid-cols-2 gap-5">
+      <div class="reveal border border-white/10 rounded-2xl p-8 h-full">
+        <p class="text-[11px] tracking-[0.2em] text-white/35 mb-6">TRADITIONAL HOME · STRESS</p>
+        <ul class="space-y-4">
+          <li class="flex items-start gap-3 text-sm text-white/50 font-light"><i data-lucide="x-circle" class="w-4 h-4 text-white/25 shrink-0 mt-0.5"></i><span>Forgetting lights, locks, and gates every time you leave</span></li>
+          <li class="flex items-start gap-3 text-sm text-white/50 font-light"><i data-lucide="x-circle" class="w-4 h-4 text-white/25 shrink-0 mt-0.5"></i><span>One remote per appliance, none of them talking to each other</span></li>
+          <li class="flex items-start gap-3 text-sm text-white/50 font-light"><i data-lucide="x-circle" class="w-4 h-4 text-white/25 shrink-0 mt-0.5"></i><span>Energy bills with no visibility into where it's spent</span></li>
+          <li class="flex items-start gap-3 text-sm text-white/50 font-light"><i data-lucide="x-circle" class="w-4 h-4 text-white/25 shrink-0 mt-0.5"></i><span>Security that only alerts you after something's gone wrong</span></li>
+        </ul>
+      </div>
+      <div class="reveal border border-[#007BFF]/30 rounded-2xl p-8 h-full glow-blue">
+        <p class="text-[11px] tracking-[0.2em] text-[#007BFF]/70 mb-6">GENESIS SMART HOME · PEACE OF MIND</p>
+        <ul class="space-y-4">
+          <li class="flex items-start gap-3 text-sm text-white/75 font-light"><i data-lucide="check-circle-2" class="w-4 h-4 text-[#007BFF] shrink-0 mt-0.5"></i><span>One home, one logic — everything arrives at "away" together</span></li>
+          <li class="flex items-start gap-3 text-sm text-white/75 font-light"><i data-lucide="check-circle-2" class="w-4 h-4 text-[#007BFF] shrink-0 mt-0.5"></i><span>A single interface for light, air, sound and access</span></li>
+          <li class="flex items-start gap-3 text-sm text-white/75 font-light"><i data-lucide="check-circle-2" class="w-4 h-4 text-[#007BFF] shrink-0 mt-0.5"></i><span>Industrial-grade energy metering, tuned room by room</span></li>
+          <li class="flex items-start gap-3 text-sm text-white/75 font-light"><i data-lucide="check-circle-2" class="w-4 h-4 text-[#007BFF] shrink-0 mt-0.5"></i><span>Access and alerts that reach you before there's a problem</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="reveal mt-6 grid sm:grid-cols-2 gap-5">
+      <div class="border border-white/10 rounded-2xl p-8 flex items-start gap-4">
+        <div class="w-11 h-11 rounded-full border border-[#E65100]/40 flex items-center justify-center shrink-0">
+          <i data-lucide="heart-handshake" class="w-4.5 h-4.5 text-[#E65100]"></i>
+        </div>
+        <div>
+          <p class="font-normal">Elderly &amp; convalescent friendly</p>
+          <p class="text-sm text-white/40 font-light mt-1.5 leading-relaxed">Voice, single-touch, and automatic scenes designed so ease of use never depends on ease of learning.</p>
+        </div>
+      </div>
+      <div class="border border-white/10 rounded-2xl p-8 flex items-start gap-4">
+        <div class="w-11 h-11 rounded-full border border-[#007BFF]/40 flex items-center justify-center shrink-0">
+          <i data-lucide="baby" class="w-4.5 h-4.5 text-[#007BFF]"></i>
+        </div>
+        <div>
+          <p class="font-normal">Child-safe by design</p>
+          <p class="text-sm text-white/40 font-light mt-1.5 leading-relaxed">Curtain motors, gate logic, and access control engineered with fail-safes for the smallest members of the house.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= TRUST WALL ============================= -->
+<section id="trust" class="py-28 border-t border-white/[0.06] bg-white/[0.015] overflow-hidden">
+  <div class="max-w-6xl mx-auto px-6 lg:px-10">
+    <div class="reveal">
+      <p class="text-[11px] tracking-[0.3em] text-[#E65100]/70 mb-4 text-center">WALL OF TRUST</p>
+      <h2 class="text-3xl lg:text-4xl font-light tracking-tight text-center">Trusted by institutions that cannot afford failure.</h2>
+    </div>
+  </div>
+
+  <div class="marquee-track mt-16 space-y-6">
+    <div class="flex overflow-hidden">
+      <div class="flex gap-4 marquee-left shrink-0" id="marquee-1"></div>
+    </div>
+    <div class="flex overflow-hidden">
+      <div class="flex gap-4 marquee-right shrink-0" id="marquee-2"></div>
+    </div>
+  </div>
+</section>
+<!-- ============================= CONSULTATION FORM ============================= -->
+<section id="contact" class="px-6 lg:px-10 py-28 border-t border-white/[0.06]">
+  <div class="max-w-3xl mx-auto">
+    <div class="reveal">
+      <p class="text-[11px] tracking-[0.3em] text-[#007BFF]/70 mb-4 text-center">BEGIN A CONSULTATION</p>
+      <h2 class="text-4xl font-light tracking-tight text-center text-balance">Tell us about the space. We'll design the intelligence.</h2>
+    </div>
+
+    <div class="reveal mt-14 border border-white/10 rounded-2xl p-8 lg:p-10 bg-white/[0.02]">
+
+      <!-- progress -->
+      <div id="form-progress" class="flex items-center gap-2 mb-10">
+        <div class="flex-1 flex items-center gap-2">
+          <div data-step-dot="1" class="step-dot w-7 h-7 rounded-full border flex items-center justify-center text-[11px] transition-colors duration-300 shrink-0 border-[#007BFF] bg-[#007BFF]/10 text-[#007BFF]">1</div>
+          <div class="h-px flex-1 bg-white/10" data-step-line="1"></div>
+        </div>
+        <div class="flex-1 flex items-center gap-2">
+          <div data-step-dot="2" class="step-dot w-7 h-7 rounded-full border flex items-center justify-center text-[11px] transition-colors duration-300 shrink-0 border-white/15 text-white/30">2</div>
+          <div class="h-px flex-1 bg-white/10" data-step-line="2"></div>
+        </div>
+        <div class="flex-1 flex items-center gap-2">
+          <div data-step-dot="3" class="step-dot w-7 h-7 rounded-full border flex items-center justify-center text-[11px] transition-colors duration-300 shrink-0 border-white/15 text-white/30">3</div>
+        </div>
+      </div>
+
+      <!-- STEP 1 -->
+      <div id="form-step-1" class="form-step">
+        <p class="text-sm tracking-wide text-white/40 mb-6">STEP 1 — PROPERTY TYPE</p>
+        <div class="grid sm:grid-cols-2 gap-4" id="property-options">
+          <button data-value="Villa" data-group="property" class="option-btn flex items-center gap-3 rounded-xl border border-white/10 hover:border-white/25 px-5 py-5 text-left transition-all duration-300">
+            <i data-lucide="home" class="w-4.5 h-4.5 text-white/50"></i><span class="text-sm">Villa</span>
+          </button>
+          <button data-value="Luxury Apartment" data-group="property" class="option-btn flex items-center gap-3 rounded-xl border border-white/10 hover:border-white/25 px-5 py-5 text-left transition-all duration-300">
+            <i data-lucide="building-2" class="w-4.5 h-4.5 text-white/50"></i><span class="text-sm">Luxury Apartment</span>
+          </button>
+          <button data-value="Commercial Space" data-group="property" class="option-btn flex items-center gap-3 rounded-xl border border-white/10 hover:border-white/25 px-5 py-5 text-left transition-all duration-300">
+            <i data-lucide="store" class="w-4.5 h-4.5 text-white/50"></i><span class="text-sm">Commercial Space</span>
+          </button>
+        </div>
+        <div class="mt-10 flex justify-end">
+          <button id="step1-next" disabled class="inline-flex items-center gap-2 rounded-full px-7 py-3 text-sm transition-all duration-300 bg-white/10 text-white/30 cursor-not-allowed">
+            Continue <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div id="form-step-2" class="form-step hidden">
+        <p class="text-sm tracking-wide text-white/40 mb-6">STEP 2 — KEY SERVICES INTERESTED IN</p>
+        <div class="grid sm:grid-cols-2 gap-4" id="interest-options">
+          <button data-value="Full Automation" data-group="interest" class="option-btn flex items-center gap-3 rounded-xl border border-white/10 hover:border-white/25 px-5 py-5 text-left transition-all duration-300">
+            <i data-lucide="sparkles" class="w-4.5 h-4.5 text-white/50"></i><span class="text-sm">Full Automation</span>
+          </button>
+          <button data-value="Home Theater" data-group="interest" class="option-btn flex items-center gap-3 rounded-xl border border-white/10 hover:border-white/25 px-5 py-5 text-left transition-all duration-300">
+            <i data-lucide="clapperboard" class="w-4.5 h-4.5 text-white/50"></i><span class="text-sm">Home Theater</span>
+          </button>
+          <button data-value="Smart Security" data-group="interest" class="option-btn flex items-center gap-3 rounded-xl border border-white/10 hover:border-white/25 px-5 py-5 text-left transition-all duration-300">
+            <i data-lucide="shield-check" class="w-4.5 h-4.5 text-white/50"></i><span class="text-sm">Smart Security</span>
+          </button>
+          <button data-value="Energy Audit" data-group="interest" class="option-btn flex items-center gap-3 rounded-xl border border-white/10 hover:border-white/25 px-5 py-5 text-left transition-all duration-300">
+            <i data-lucide="gauge" class="w-4.5 h-4.5 text-white/50"></i><span class="text-sm">Energy Audit</span>
+          </button>
+        </div>
+        <div class="mt-10 flex justify-between">
+          <button id="step2-back" class="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm text-white/50 hover:text-white transition-colors">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i> Back
+          </button>
+          <button id="step2-next" disabled class="inline-flex items-center gap-2 rounded-full px-7 py-3 text-sm transition-all duration-300 bg-white/10 text-white/30 cursor-not-allowed">
+            Continue <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div id="form-step-3" class="form-step hidden">
+        <p class="text-sm tracking-wide text-white/40 mb-6">STEP 3 — YOUR DETAILS</p>
+        <div class="space-y-4">
+          <input id="field-name" type="text" placeholder="Full name" class="w-full bg-transparent border border-white/15 focus:border-[#007BFF] rounded-lg px-5 py-3.5 text-sm outline-none transition-colors placeholder:text-white/25" />
+          <input id="field-phone" type="tel" placeholder="Phone number" class="w-full bg-transparent border border-white/15 focus:border-[#007BFF] rounded-lg px-5 py-3.5 text-sm outline-none transition-colors placeholder:text-white/25" />
+          <input id="field-city" type="text" placeholder="City / Location" class="w-full bg-transparent border border-white/15 focus:border-[#007BFF] rounded-lg px-5 py-3.5 text-sm outline-none transition-colors placeholder:text-white/25" />
+        </div>
+        <div class="mt-10 flex justify-between">
+          <button id="step3-back" class="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm text-white/50 hover:text-white transition-colors">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i> Back
+          </button>
+          <button id="step3-submit" disabled class="inline-flex items-center gap-2 rounded-full px-7 py-3 text-sm transition-all duration-300 bg-white/10 text-white/30 cursor-not-allowed">
+            Submit Request <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- CONFIRMATION -->
+      <div id="form-confirmation" class="hidden text-center py-10">
+        <i data-lucide="check-circle-2" class="w-10 h-10 text-[#007BFF] mx-auto mb-5"></i>
+        <h3 class="text-2xl font-light">Redirecting you to WhatsApp…</h3>
+        <p class="text-white/45 font-light mt-3 max-w-md mx-auto">
+          Your consultation request is ready. If WhatsApp didn't open automatically,
+          <a href="https://wa.me/917008049055" target="_blank" rel="noopener" class="text-[#007BFF] hover:underline">tap here</a>.
+        </p>
+        <button id="form-reset" class="mt-8 text-sm text-[#007BFF] hover:underline">Submit another request</button>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ============================= FOOTER ============================= -->
+<footer class="border-t border-white/[0.06] px-6 lg:px-10 py-14">
+  <div class="max-w-6xl mx-auto grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
+    <div>
+      <div class="flex items-center gap-3">
+        <img src="data:image/png;base64,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" alt="Genesis Automation" class="h-9 w-9 object-contain" />
+        <div>
+          <p class="text-[12px] tracking-[0.25em]">GENESIS AUTOMATION</p>
+          <p class="text-[10px] tracking-[0.2em] text-white/35 mt-0.5">INSPIRING INNOVATIONS</p>
+        </div>
+      </div>
+    </div>
+    <div>
+      <p class="text-[11px] tracking-[0.2em] text-white/35 mb-4">HEADQUARTERS</p>
+      <p class="text-sm text-white/55 font-light leading-relaxed flex items-start gap-2">
+        <i data-lucide="map-pin" class="w-4 h-4 shrink-0 mt-0.5 text-[#E65100]"></i>
+        67, K5, HIG, Kalinga Vihar, Bhubaneswar, Odisha-751019
+      </p>
+    </div>
+    <div>
+      <p class="text-[11px] tracking-[0.2em] text-white/35 mb-4">REACH US</p>
+      <div class="space-y-2.5 text-sm text-white/55 font-light">
+        <p class="flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4 text-[#007BFF]"></i> hello@genesisautomations.in</p>
+        <p class="flex items-center gap-2"><i data-lucide="globe" class="w-4 h-4 text-[#007BFF]"></i> www.genesisautomations.in</p>
+        <p class="flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4 text-[#E65100]"></i> +91 70080 49055</p>
+        <p class="flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4 text-[#E65100]"></i> +91 95577 44220</p>
+      </div>
+    </div>
+    <div>
+      <p class="text-[11px] tracking-[0.2em] text-white/35 mb-4">NAVIGATE</p>
+      <div class="flex flex-col gap-2.5">
+        <a href="#ecosystem" class="text-sm text-white/55 font-light hover:text-white transition-colors">Ecosystem</a>
+        <a href="#vault" class="text-sm text-white/55 font-light hover:text-white transition-colors">The Hardware Vault</a>
+        <a href="#core" class="text-sm text-white/55 font-light hover:text-white transition-colors">Industrial Core</a>
+        <a href="#trust" class="text-sm text-white/55 font-light hover:text-white transition-colors">Trust Wall</a>
+        <a href="#contact" class="text-sm text-white/55 font-light hover:text-white transition-colors">Contact</a>
+      </div>
+    </div>
+  </div>
+  <div class="max-w-6xl mx-auto mt-12 pt-8 border-t border-white/[0.06] flex flex-col sm:flex-row justify-between gap-3 text-[11px] text-white/25 tracking-wide">
+    <p>&copy; <span id="year"></span> Genesis Automation. All rights reserved.</p>
+    <p>Industrial-grade engineering, for the home.</p>
+  </div>
+</footer>
+
+<!-- floating whatsapp button -->
+<a href="https://wa.me/917008049055?text=Hi%20Genesis%20Team%2C%20I%20want%20to%20explore%20home%20automation%20options."
+   target="_blank" rel="noopener"
+   class="ripple-wa fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-[#E65100] flex items-center justify-center shadow-lg hover:scale-105 transition-transform duration-300">
+  <i data-lucide="message-circle" class="w-6 h-6 text-white"></i>
+</a>
+<script>
+  /* ============================= DATA ============================= */
+  const SERVICES = {
+    "smart-lighting": {
+      eyebrow: "AMBIANCE", title: "Smart Lighting", icon: "lightbulb", color: "#007BFF",
+      tagline: "Circadian-tuned lighting scenes that shift with the hour, the mood, and the occasion — controlled from a single app, switch, or voice command.",
+      features: [
+        "Scene presets: Morning, Focus, Dinner, Movie, Night",
+        "Dimmable, colour-tunable LED circuits on every zone",
+        "Astronomical time-clock sync with sunrise / sunset",
+        "Works with existing switch plates — no rewiring gut job",
+        "Integrates with curtains, HVAC and security for full scenes"
+      ]
+    },
+    "hvac": {
+      eyebrow: "AMBIANCE", title: "HVAC Control", icon: "wind", color: "#007BFF",
+      tagline: "Room-by-room climate intelligence that keeps every space at the right temperature without wasting a single unit of power.",
+      features: [
+        "Zone-wise temperature scheduling by room and time",
+        "Occupancy-based auto shut-off to cut standby load",
+        "Remote pre-cooling before you arrive home",
+        "Compatible with VRV/VRF, split and central systems",
+        "Real-time energy consumption reporting per zone"
+      ]
+    },
+    "curtains": {
+      eyebrow: "AMBIANCE", title: "Motorized Curtains", icon: "blinds", color: "#007BFF",
+      tagline: "Silent motorised tracks that open and close curtains and blinds on schedule, on scene, or on a single tap.",
+      features: [
+        "Whisper-quiet motors rated for daily heavy-duty use",
+        "Battery backup for uninterrupted operation on outage",
+        "Group control across multiple windows in one motion",
+        "Scheduled open/close synced with sunrise and sunset",
+        "Manual override always available at the track"
+      ]
+    },
+    "smart-glass": {
+      eyebrow: "AMBIANCE", title: "Smart Glass", icon: "square-stack", color: "#007BFF",
+      tagline: "Switchable privacy glass that turns from clear to frosted in an instant — for bathrooms, meeting rooms, and statement partitions.",
+      features: [
+        "Instant opacity switch via app, switch or automation",
+        "UV and heat-reduction interlayer options",
+        "Ideal for home offices, ensuites and glass partitions",
+        "Silent operation with no visible film lines",
+        "Pairs with scenes for automatic privacy scheduling"
+      ]
+    },
+    "video-door": {
+      eyebrow: "SECURITY & ACCESS", title: "IP Video Door Phones", icon: "video", color: "#E65100",
+      tagline: "See, speak to, and grant access to visitors from anywhere in the world — full HD, night vision included.",
+      features: [
+        "Full HD camera with wide-angle night vision",
+        "Two-way audio and remote gate/door release",
+        "Push notifications to every family member's phone",
+        "Visitor snapshot log with timestamp history",
+        "Integrates directly with smart locks and gates"
+      ]
+    },
+    "smart-locks": {
+      eyebrow: "SECURITY & ACCESS", title: "Smart Locks", icon: "lock", color: "#E65100",
+      tagline: "Keyless entry with biometric, PIN, card, and app-based access — with a full audit trail of who came and went.",
+      features: [
+        "Fingerprint, PIN, RFID card and app unlock modes",
+        "Auto-lock on exit with door-ajar alerts",
+        "Time-bound guest and staff access codes",
+        "Tamper and forced-entry alarm triggers",
+        "Mechanical key override always retained"
+      ]
+    },
+    "motorized-gates": {
+      eyebrow: "SECURITY & ACCESS", title: "Motorized Gates", icon: "door-closed", color: "#E65100",
+      tagline: "Industrial-grade gate automation for driveways and compounds, built for daily heavy use and monsoon-proof reliability.",
+      features: [
+        "Heavy-duty motors rated for large sliding/swing gates",
+        "Remote, app, and number-plate recognition triggers",
+        "Obstacle-detection safety sensors",
+        "Battery backup to operate through power cuts",
+        "Weatherproof housing for outdoor installation"
+      ]
+    },
+    "burglar-alarms": {
+      eyebrow: "SECURITY & ACCESS", title: "Burglar Alarms", icon: "bell-ring", color: "#E65100",
+      tagline: "Perimeter and zone-based intrusion detection that alerts you and your security team the moment something's wrong.",
+      features: [
+        "Door/window contact sensors and motion detectors",
+        "Instant push, SMS and call alerts on breach",
+        "Silent panic-trigger option for discreet alerts",
+        "Zone arming — home, away, and night modes",
+        "Optional integration with local security agencies"
+      ]
+    },
+    "wired-automation": {
+      eyebrow: "INFRASTRUCTURE", title: "Wired Automation", icon: "cable", color: "#007BFF",
+      tagline: "Structured, KNX-grade wired backbones for new-build homes that demand zero signal drop and decades of reliability.",
+      features: [
+        "KNX / structured cabling for whole-home control",
+        "Industrial-grade components (Schneider, ABB, Legrand)",
+        "Zero wireless interference — built for large properties",
+        "Future-proof backbone for adding modules later",
+        "Best suited to new construction and full renovations"
+      ]
+    },
+    "wireless-automation": {
+      eyebrow: "INFRASTRUCTURE", title: "Wireless Automation", icon: "waves", color: "#007BFF",
+      tagline: "Retrofit-friendly automation for homes that don't want to break open a single wall.",
+      features: [
+        "Mesh-network wireless switches and sensors",
+        "Zero civil work — ideal for ready-to-move-in homes",
+        "Encrypted RF protocol for reliable, secure control",
+        "Scales easily as you add rooms or upgrade devices",
+        "Battery-run nodes with multi-year life"
+      ]
+    },
+    "water-level": {
+      eyebrow: "INFRASTRUCTURE", title: "Water Level Controllers", icon: "gauge", color: "#007BFF",
+      tagline: "Wireless sensors that track overhead and underground tank levels, ending the guessing game with motor timing forever.",
+      features: [
+        "Real-time tank level readout on your phone",
+        "Automatic motor start/stop on level thresholds",
+        "Dry-run and overflow protection alerts",
+        "Multi-tank monitoring from a single dashboard",
+        "Wireless sensor install — no plumbing changes"
+      ]
+    },
+    "home-cinema": {
+      eyebrow: "ENTERTAINMENT", title: "Home Cinema", icon: "clapperboard", color: "#E65100",
+      tagline: "Acoustically treated, calibrated home theatre rooms engineered for reference-grade picture and sound.",
+      features: [
+        "4K/8K projection or large-format display integration",
+        "Dolby Atmos / DTS:X multi-channel audio calibration",
+        "Acoustic panelling and light-control engineering",
+        "One-touch scene: dim lights, close blinds, power on",
+        "Universal remote control across all AV components"
+      ]
+    },
+    "multi-zone-audio": {
+      eyebrow: "ENTERTAINMENT", title: "Multi-Zone Audio", icon: "speaker", color: "#E65100",
+      tagline: "The same playlist — or a different one in every room — streamed in sync across your entire home.",
+      features: [
+        "Independent audio zones for every room or area",
+        "Streaming support for all major music services",
+        "In-ceiling, in-wall and outdoor speaker options",
+        "Group or split zones instantly from the app",
+        "Voice control integration for hands-free playback"
+      ]
+    }
+  };
+
+  const TRUST_LOGOS = [
+    "Indian Railways", "Coca-Cola", "Aditya Birla Group", "Utkal Alumina",
+    "DLF", "SMS Group", "Modicare Ariana", "Hotel Imperial", "Rotary Club"
+  ];
+
+  /* ============================= INIT ICONS ============================= */
+  lucide.createIcons();
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  /* ============================= HEADER SCROLL STATE ============================= */
+  const header = document.getElementById("site-header");
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > 12) {
+      header.classList.add("bg-[#0b0b0b]/70", "backdrop-blur-xl", "border-white/10");
+    } else {
+      header.classList.remove("bg-[#0b0b0b]/70", "backdrop-blur-xl", "border-white/10");
+    }
+  });
+
+  /* ============================= MOBILE MENU ============================= */
+  const menuBtn = document.getElementById("menu-btn");
+  const menuIcon = document.getElementById("menu-icon");
+  const mobileMenu = document.getElementById("mobile-menu");
+  let menuOpen = false;
+  menuBtn.addEventListener("click", () => {
+    menuOpen = !menuOpen;
+    mobileMenu.classList.toggle("hidden", !menuOpen);
+    mobileMenu.classList.toggle("flex", menuOpen);
+    menuIcon.setAttribute("data-lucide", menuOpen ? "x" : "menu");
+    lucide.createIcons();
+  });
+  document.querySelectorAll(".mobile-link").forEach((link) => {
+    link.addEventListener("click", () => {
+      menuOpen = false;
+      mobileMenu.classList.add("hidden");
+      mobileMenu.classList.remove("flex");
+      menuIcon.setAttribute("data-lucide", "menu");
+      lucide.createIcons();
+    });
+  });
+
+  /* ============================= SCROLL REVEAL ============================= */
+  const revealEls = document.querySelectorAll(".reveal");
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("in");
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach((el) => io.observe(el));
+
+  /* ============================= SERVICE MODAL ============================= */
+  const modal = document.getElementById("service-modal");
+  const modalIcon = document.getElementById("modal-icon");
+  const modalEyebrow = document.getElementById("modal-eyebrow");
+  const modalTitle = document.getElementById("modal-title");
+  const modalTagline = document.getElementById("modal-tagline");
+  const modalFeatures = document.getElementById("modal-features");
+  const modalCta = document.getElementById("modal-cta");
+
+  function openServiceModal(id) {
+    const data = SERVICES[id];
+    if (!data) return;
+    modalIcon.innerHTML = '<i data-lucide="' + data.icon + '" class="w-5 h-5"></i>';
+    modalIcon.style.borderColor = data.color + "66";
+    modalIcon.style.color = data.color;
+    modalEyebrow.textContent = data.eyebrow;
+    modalTitle.textContent = data.title;
+    modalTagline.textContent = data.tagline;
+    modalFeatures.innerHTML = "";
+    data.features.forEach((f) => {
+      const li = document.createElement("li");
+      li.className = "flex items-start gap-3 text-sm text-white/65 font-light";
+      li.innerHTML = '<i data-lucide="check" class="w-4 h-4 shrink-0 mt-0.5" style="color:' + data.color + '"></i><span>' + f + "</span>";
+      modalFeatures.appendChild(li);
+    });
+    modalCta.href = "https://wa.me/917008049055?text=" + encodeURIComponent(
+      "Hi Genesis Team, I'd like to know more about " + data.title + "."
+    );
+    modalCta.onclick = () => window.open(modalCta.href, "_blank");
+    modal.classList.add("open");
+    document.body.style.overflow = "hidden";
+    lucide.createIcons();
+  }
+
+  function closeServiceModal() {
+    modal.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  document.querySelectorAll(".service-card").forEach((btn) => {
+    btn.addEventListener("click", () => openServiceModal(btn.getAttribute("data-service")));
+  });
+  document.getElementById("modal-close").addEventListener("click", closeServiceModal);
+  modal.addEventListener("click", (e) => { if (e.target === modal) closeServiceModal(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeServiceModal(); });
+
+  /* ============================= HARDWARE VAULT TABS ============================= */
+  const tabWired = document.getElementById("tab-wired");
+  const tabWireless = document.getElementById("tab-wireless");
+  const vaultWired = document.getElementById("vault-wired");
+  const vaultWireless = document.getElementById("vault-wireless");
+
+  tabWired.addEventListener("click", () => {
+    tabWired.classList.add("bg-[#007BFF]", "text-white");
+    tabWired.classList.remove("text-white/50");
+    tabWireless.classList.remove("bg-[#E65100]", "text-white");
+    tabWireless.classList.add("text-white/50");
+    vaultWired.classList.remove("hidden");
+    vaultWireless.classList.add("hidden");
+  });
+  tabWireless.addEventListener("click", () => {
+    tabWireless.classList.add("bg-[#E65100]", "text-white");
+    tabWireless.classList.remove("text-white/50");
+    tabWired.classList.remove("bg-[#007BFF]", "text-white");
+    tabWired.classList.add("text-white/50");
+    vaultWireless.classList.remove("hidden");
+    vaultWired.classList.add("hidden");
+  });
+
+  /* ============================= TRUST MARQUEE ============================= */
+  function buildMarquee(elId, list) {
+    const el = document.getElementById(elId);
+    const doubled = [...list, ...list];
+    doubled.forEach((name) => {
+      const chip = document.createElement("div");
+      chip.className = "border border-white/10 rounded-full px-8 py-4 text-sm text-white/50 whitespace-nowrap tracking-wide";
+      chip.textContent = name;
+      el.appendChild(chip);
+    });
+  }
+  buildMarquee("marquee-1", TRUST_LOGOS);
+  buildMarquee("marquee-2", TRUST_LOGOS.slice().reverse());
+
+  /* ============================= MULTI-STEP FORM ============================= */
+  const formState = { property: "", interest: "", name: "", phone: "", city: "" };
+  let currentStep = 1;
+
+  function setStepUI(step) {
+    currentStep = step;
+    [1, 2, 3].forEach((s) => {
+      document.getElementById("form-step-" + s).classList.toggle("hidden", s !== step);
+      const dot = document.querySelector('[data-step-dot="' + s + '"]');
+      if (s <= step) {
+        dot.classList.add("border-[#007BFF]", "bg-[#007BFF]/10", "text-[#007BFF]");
+        dot.classList.remove("border-white/15", "text-white/30");
+      } else {
+        dot.classList.remove("border-[#007BFF]", "bg-[#007BFF]/10", "text-[#007BFF]");
+        dot.classList.add("border-white/15", "text-white/30");
+      }
+    });
+    [1, 2].forEach((s) => {
+      const line = document.querySelector('[data-step-line="' + s + '"]');
+      if (line) line.classList.toggle("bg-[#007BFF]/50", step > s);
+    });
+  }
+
+  document.querySelectorAll('.option-btn[data-group="property"]').forEach((btn) => {
+    btn.addEventListener("click", () => {
+      formState.property = btn.getAttribute("data-value");
+      document.querySelectorAll('.option-btn[data-group="property"]').forEach((b) => {
+        b.classList.remove("border-[#007BFF]/60", "glow-blue", "bg-[#007BFF]/5");
+        b.classList.add("border-white/10");
+      });
+      btn.classList.add("border-[#007BFF]/60", "glow-blue", "bg-[#007BFF]/5");
+      btn.classList.remove("border-white/10");
+      const next = document.getElementById("step1-next");
+      next.disabled = false;
+      next.classList.remove("bg-white/10", "text-white/30", "cursor-not-allowed");
+      next.classList.add("bg-white", "text-[#0b0b0b]", "hover:bg-[#007BFF]", "hover:text-white");
+    });
+  });
+
+  document.querySelectorAll('.option-btn[data-group="interest"]').forEach((btn) => {
+    btn.addEventListener("click", () => {
+      formState.interest = btn.getAttribute("data-value");
+      document.querySelectorAll('.option-btn[data-group="interest"]').forEach((b) => {
+        b.classList.remove("border-[#E65100]/60", "glow-orange", "bg-[#E65100]/5");
+        b.classList.add("border-white/10");
+      });
+      btn.classList.add("border-[#E65100]/60", "glow-orange", "bg-[#E65100]/5");
+      btn.classList.remove("border-white/10");
+      const next = document.getElementById("step2-next");
+      next.disabled = false;
+      next.classList.remove("bg-white/10", "text-white/30", "cursor-not-allowed");
+      next.classList.add("bg-white", "text-[#0b0b0b]", "hover:bg-[#007BFF]", "hover:text-white");
+    });
+  });
+
+  document.getElementById("step1-next").addEventListener("click", () => { if (formState.property) setStepUI(2); });
+  document.getElementById("step2-back").addEventListener("click", () => setStepUI(1));
+  document.getElementById("step2-next").addEventListener("click", () => { if (formState.interest) setStepUI(3); });
+  document.getElementById("step3-back").addEventListener("click", () => setStepUI(2));
+
+  function validateStep3() {
+    const submitBtn = document.getElementById("step3-submit");
+    const ok = formState.name.trim() !== "" && formState.phone.trim() !== "" && formState.city.trim() !== "";
+    submitBtn.disabled = !ok;
+    if (ok) {
+      submitBtn.classList.remove("bg-white/10", "text-white/30", "cursor-not-allowed");
+      submitBtn.classList.add("bg-[#007BFF]", "text-white", "hover:bg-[#007BFF]/90", "glow-blue");
+    } else {
+      submitBtn.classList.add("bg-white/10", "text-white/30", "cursor-not-allowed");
+      submitBtn.classList.remove("bg-[#007BFF]", "text-white", "hover:bg-[#007BFF]/90", "glow-blue");
+    }
+  }
+  document.getElementById("field-name").addEventListener("input", (e) => { formState.name = e.target.value; validateStep3(); });
+  document.getElementById("field-phone").addEventListener("input", (e) => { formState.phone = e.target.value; validateStep3(); });
+  document.getElementById("field-city").addEventListener("input", (e) => { formState.city = e.target.value; validateStep3(); });
+
+  document.getElementById("step3-submit").addEventListener("click", (e) => {
+    e.preventDefault();
+    if (document.getElementById("step3-submit").disabled) return;
+
+    const message =
+      "Hi Genesis Team, I'd like to request a consultation.\n\n" +
+      "Property Type: " + formState.property + "\n" +
+      "Key Interest: " + formState.interest + "\n" +
+      "Name: " + formState.name + "\n" +
+      "Phone: " + formState.phone + "\n" +
+      "City: " + formState.city;
+
+    const waLink = "https://wa.me/917008049055?text=" + encodeURIComponent(message);
+
+    [1, 2, 3].forEach((s) => document.getElementById("form-step-" + s).classList.add("hidden"));
+    document.getElementById("form-progress").classList.add("hidden");
+    document.getElementById("form-confirmation").classList.remove("hidden");
+    lucide.createIcons();
+    document.getElementById("form-confirmation").querySelector("a").href = waLink;
+
+    window.location.href = waLink;
+  });
+
+  document.getElementById("form-reset").addEventListener("click", () => {
+    formState.property = ""; formState.interest = ""; formState.name = ""; formState.phone = ""; formState.city = "";
+    document.getElementById("field-name").value = "";
+    document.getElementById("field-phone").value = "";
+    document.getElementById("field-city").value = "";
+    document.querySelectorAll(".option-btn").forEach((b) => {
+      b.classList.remove("border-[#007BFF]/60", "glow-blue", "bg-[#007BFF]/5", "border-[#E65100]/60", "glow-orange", "bg-[#E65100]/5");
+      b.classList.add("border-white/10");
+    });
+    ["step1-next", "step2-next"].forEach((id) => {
+      const btn = document.getElementById(id);
+      btn.disabled = true;
+      btn.classList.add("bg-white/10", "text-white/30", "cursor-not-allowed");
+      btn.classList.remove("bg-white", "text-[#0b0b0b]", "hover:bg-[#007BFF]", "hover:text-white");
+    });
+    document.getElementById("form-confirmation").classList.add("hidden");
+    document.getElementById("form-progress").classList.remove("hidden");
+    setStepUI(1);
+  });
 </script>
 </body>
 </html>
