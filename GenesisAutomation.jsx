@@ -1,0 +1,935 @@
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Menu,
+  X,
+  Phone,
+  ArrowRight,
+  ArrowUpRight,
+  Lightbulb,
+  Wind,
+  Blinds,
+  Layers,
+  KeyRound,
+  Video,
+  DoorClosed,
+  BellRing,
+  Cable,
+  Waves,
+  Clapperboard,
+  Speaker,
+  MonitorPlay,
+  CheckCircle2,
+  XCircle,
+  HeartHandshake,
+  Baby,
+  Building2,
+  Hotel,
+  Home,
+  Store,
+  MapPin,
+  Mail,
+  Globe,
+  ChevronRight,
+  ChevronLeft,
+  Sparkles,
+  ShieldCheck,
+  Gauge,
+} from "lucide-react";
+
+/* ---------------------------------------------------------------------- */
+/*  GENESIS AUTOMATION — single-page luxury experience                    */
+/*  Palette: void #0b0b0b · signal blue #007BFF · ember orange #E65100    */
+/* ---------------------------------------------------------------------- */
+
+const HUBS = [
+  {
+    id: "ambiance",
+    label: "Ambiance",
+    index: "01",
+    icon: Lightbulb,
+    accent: "blue",
+    blurb: "The air, the light, the mood — tuned to the hour of your day.",
+    items: [
+      { icon: Lightbulb, name: "Smart Lighting" },
+      { icon: Wind, name: "HVAC Control" },
+      { icon: Blinds, name: "Motorized Curtains" },
+      { icon: Layers, name: "Smart Glass" },
+    ],
+  },
+  {
+    id: "security",
+    label: "Security & Access",
+    index: "02",
+    icon: KeyRound,
+    accent: "orange",
+    blurb: "Every entry, every alert, watched without ever feeling watched.",
+    items: [
+      { icon: KeyRound, name: "Smart Locks" },
+      { icon: Video, name: "IP Video Door Phones" },
+      { icon: DoorClosed, name: "Motorized Gates" },
+      { icon: BellRing, name: "Burglar Alarms" },
+    ],
+  },
+  {
+    id: "infrastructure",
+    label: "Infrastructure",
+    index: "03",
+    icon: Cable,
+    accent: "blue",
+    blurb: "The unseen backbone — industrial-grade, wherever it needs to be.",
+    items: [
+      { icon: Cable, name: "Wired Automation" },
+      { icon: Waves, name: "Wireless Automation" },
+      { icon: Gauge, name: "Wireless Water Level Controllers" },
+    ],
+  },
+  {
+    id: "entertainment",
+    label: "Entertainment & Work",
+    index: "04",
+    icon: Clapperboard,
+    accent: "orange",
+    blurb: "A room that performs for a film, and disappears for a meeting.",
+    items: [
+      { icon: Clapperboard, name: "Home Cinema" },
+      { icon: Speaker, name: "Multi-Zone Audio" },
+      { icon: MonitorPlay, name: "Video Conferencing" },
+    ],
+  },
+];
+
+const WIRED_BRANDS = [
+  { name: "Schneider", tag: "Electric Infrastructure" },
+  { name: "Havells", tag: "Power & Switching" },
+  { name: "Legrand", tag: "Wiring Devices" },
+  { name: "ABB", tag: "Industrial Automation" },
+  { name: "Ekinex", tag: "KNX Design Systems" },
+];
+
+const WIRELESS_BRANDS = [
+  { name: "JR", tag: "Loft Glass & Metal Series" },
+  { name: "Smart Node", tag: "Acrylic & Glass Finish" },
+];
+
+const STRESS = [
+  "Forgetting lights, locks, and gates every time you leave",
+  "One remote per appliance, none of them talking to each other",
+  "Energy bills with no visibility into where it's spent",
+  "Security that only alerts you after something's gone wrong",
+];
+
+const PEACE = [
+  "One home, one logic — everything arrives at 'away' together",
+  "A single interface for light, air, sound and access",
+  "Industrial-grade energy metering, tuned room by room",
+  "Access and alerts that reach you before there's a problem",
+];
+
+const TRUST_LOGOS = [
+  "Indian Railways",
+  "Coca-Cola",
+  "Aditya Birla",
+  "Utkal Alumina",
+  "DLF",
+  "SMS Group",
+  "Modicare Ariana",
+  "Hotel Imperial",
+  "Rotary Club",
+];
+
+const NAV_LINKS = [
+  { label: "Ecosystem", href: "#ecosystem" },
+  { label: "The Hardware Vault", href: "#vault" },
+  { label: "Industrial Core", href: "#core" },
+  { label: "Trust Wall", href: "#trust" },
+  { label: "Contact", href: "#contact" },
+];
+
+const PROPERTY_TYPES = [
+  { label: "Villa", icon: Home },
+  { label: "Luxury Apartment", icon: Building2 },
+  { label: "Commercial Space", icon: Store },
+  { label: "Hotel / Hospitality", icon: Hotel },
+];
+
+const INTERESTS = [
+  { label: "Full Automation", icon: Sparkles },
+  { label: "Home Theater", icon: Clapperboard },
+  { label: "Smart Security", icon: ShieldCheck },
+  { label: "Energy Audit", icon: Gauge },
+];
+
+/* ---------------------------------------------------------------------- */
+
+function GenesisMark({ size = 36 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <polygon
+        points="24,3 44,15 44,33 24,45 4,33 4,15"
+        stroke="#007BFF"
+        strokeWidth="1.2"
+        fill="none"
+        opacity="0.55"
+      />
+      <polygon points="24,11 37,18.5 37,29.5 24,37 11,29.5 11,18.5" fill="#0b0b0b" stroke="#E65100" strokeWidth="1.2" opacity="0.85" />
+      <circle cx="24" cy="24" r="4.5" fill="#007BFF" opacity="0.9" />
+    </svg>
+  );
+}
+
+function Reveal({ children, className = "", delay = 0 }) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+    obs.observe(node);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-1000 ease-out ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+      } ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+}
+
+export default function GenesisAutomation() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [activeHub, setActiveHub] = useState(0);
+  const [vaultTab, setVaultTab] = useState("wired");
+  const [scrolled, setScrolled] = useState(false);
+
+  const [step, setStep] = useState(1);
+  const [form, setForm] = useState({
+    propertyType: "",
+    interest: "",
+    name: "",
+    phone: "",
+    city: "",
+  });
+  const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const closeMenuAndScroll = (href) => {
+    setMenuOpen(false);
+    const el = document.querySelector(href);
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const canAdvanceStep1 = form.propertyType !== "";
+  const canAdvanceStep2 = form.interest !== "";
+  const canSubmit = form.name.trim() !== "" && form.phone.trim() !== "" && form.city.trim() !== "";
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (canSubmit) setSubmitted(true);
+  };
+
+  return (
+    <div className="min-h-screen w-full bg-[#0b0b0b] text-white font-sans antialiased selection:bg-[#007BFF]/30 selection:text-white">
+      <style>{`
+        @keyframes marquee-left {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        @keyframes marquee-right {
+          0% { transform: translateX(-50%); }
+          100% { transform: translateX(0); }
+        }
+        .animate-marquee-left { animation: marquee-left 32s linear infinite; }
+        .animate-marquee-right { animation: marquee-right 38s linear infinite; }
+        .glow-blue { box-shadow: 0 0 0 1px rgba(0,123,255,0.25), 0 0 40px -12px rgba(0,123,255,0.45); }
+        .glow-orange { box-shadow: 0 0 0 1px rgba(230,81,0,0.25), 0 0 40px -12px rgba(230,81,0,0.45); }
+        .text-balance { text-wrap: balance; }
+      `}</style>
+
+      {/* ============================= HEADER ============================= */}
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+          scrolled ? "bg-[#0b0b0b]/70 backdrop-blur-xl border-b border-white/10" : "bg-transparent border-b border-transparent"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between h-20">
+          <div className="flex items-center gap-3">
+            <GenesisMark size={34} />
+            <div className="leading-tight">
+              <p className="text-[13px] tracking-[0.28em] font-medium text-white">GENESIS AUTOMATION</p>
+              <p className="text-[10px] tracking-[0.2em] text-white/40 mt-0.5">INSPIRING INNOVATIONS</p>
+            </div>
+          </div>
+
+          <nav className="hidden lg:flex items-center gap-10">
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={(e) => {
+                  e.preventDefault();
+                  closeMenuAndScroll(link.href);
+                }}
+                className="text-[13px] tracking-wide text-white/60 hover:text-white transition-colors duration-300 relative group"
+              >
+                {link.label}
+                <span className="absolute -bottom-1 left-0 w-0 h-px bg-[#007BFF] transition-all duration-300 group-hover:w-full" />
+              </a>
+            ))}
+          </nav>
+
+          <div className="hidden lg:flex items-center">
+            <a
+              href="tel:+917008049055"
+              className="group flex items-center gap-2 border border-[#007BFF]/50 rounded-full px-5 py-2.5 text-[12px] tracking-wide text-white/90 hover:border-[#007BFF] hover:glow-blue transition-all duration-300"
+            >
+              <Phone size={14} className="text-[#007BFF]" />
+              <span>+91 70080 49055</span>
+            </a>
+          </div>
+
+          <button
+            className="lg:hidden text-white/80"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
+
+        {menuOpen && (
+          <div className="lg:hidden bg-[#0b0b0b]/95 backdrop-blur-xl border-t border-white/10 px-6 py-6 flex flex-col gap-5">
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={(e) => {
+                  e.preventDefault();
+                  closeMenuAndScroll(link.href);
+                }}
+                className="text-sm tracking-wide text-white/70 hover:text-white"
+              >
+                {link.label}
+              </a>
+            ))}
+            <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
+              <a href="tel:+917008049055" className="text-sm text-white/80 flex items-center gap-2">
+                <Phone size={14} className="text-[#007BFF]" /> +91 70080 49055
+              </a>
+              <a href="tel:+919557744220" className="text-sm text-white/80 flex items-center gap-2">
+                <Phone size={14} className="text-[#E65100]" /> +91 95577 44220
+              </a>
+            </div>
+          </div>
+        )}
+      </header>
+
+      {/* ============================= HERO ============================= */}
+      <section className="relative pt-40 pb-28 px-6 lg:px-10 overflow-hidden">
+        <div
+          className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 blur-3xl"
+          style={{ background: "radial-gradient(circle, rgba(0,123,255,0.5) 0%, rgba(230,81,0,0.25) 45%, transparent 70%)" }}
+        />
+        <div className="max-w-6xl mx-auto relative">
+          <Reveal>
+            <p className="text-[11px] tracking-[0.3em] text-white/40 mb-8 flex items-center gap-2">
+              <span className="w-8 h-px bg-[#E65100]" /> ODISHA · INDUSTRIAL-GRADE HOME AUTOMATION
+            </p>
+          </Reveal>
+          <Reveal delay={100}>
+            <h1 className="text-[13vw] leading-[0.98] lg:text-[74px] font-light tracking-tight text-balance max-w-5xl">
+              Designing Experiences,
+              <br />
+              <span className="text-white/40">Not Just Installing</span>{" "}
+              <span
+                className="bg-clip-text text-transparent"
+                style={{ backgroundImage: "linear-gradient(90deg, #007BFF, #E65100)" }}
+              >
+                Devices.
+              </span>
+            </h1>
+          </Reveal>
+          <Reveal delay={200}>
+            <p className="mt-8 text-lg text-white/50 max-w-xl font-light leading-relaxed">
+              Where 15+ years of industrial-grade engineering meets everyday luxury living in Odisha.
+            </p>
+          </Reveal>
+          <Reveal delay={300}>
+            <div className="mt-12 flex flex-wrap items-center gap-4">
+              <a
+                href="#ecosystem"
+                onClick={(e) => {
+                  e.preventDefault();
+                  closeMenuAndScroll("#ecosystem");
+                }}
+                className="group inline-flex items-center gap-2 bg-white text-[#0b0b0b] rounded-full px-7 py-3.5 text-sm font-medium hover:bg-[#007BFF] hover:text-white transition-all duration-300"
+              >
+                Explore Ecosystem
+                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+              </a>
+              <a
+                href="#contact"
+                onClick={(e) => {
+                  e.preventDefault();
+                  closeMenuAndScroll("#contact");
+                }}
+                className="inline-flex items-center gap-2 border border-white/20 rounded-full px-7 py-3.5 text-sm font-medium text-white/80 hover:border-[#E65100] hover:text-white hover:glow-orange transition-all duration-300"
+              >
+                Schedule Demo
+              </a>
+            </div>
+          </Reveal>
+        </div>
+
+        {/* ambient architecture visual slot */}
+        <Reveal delay={400}>
+          <div className="max-w-6xl mx-auto mt-20 relative">
+            <div className="relative rounded-2xl border border-white/10 overflow-hidden h-[340px] lg:h-[460px] bg-gradient-to-br from-white/[0.04] to-transparent">
+              <div
+                className="absolute inset-0 opacity-60"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(135deg, rgba(0,123,255,0.12) 0%, transparent 40%, rgba(230,81,0,0.10) 100%)",
+                }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center px-6">
+                  <GenesisMark size={54} />
+                  <p className="mt-4 text-[11px] tracking-[0.3em] text-white/30">
+                    A HOME, RUNNING ON A SINGLE INTELLIGENCE
+                  </p>
+                </div>
+              </div>
+              <div className="absolute bottom-6 left-6 right-6 flex justify-between text-[10px] tracking-[0.2em] text-white/25">
+                <span>ARCHITECTURE · LIGHT · CONTROL</span>
+                <span>BHUBANESWAR, ODISHA</span>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* ============================= ECOSYSTEM ============================= */}
+      <section id="ecosystem" className="px-6 lg:px-10 py-28 border-t border-white/[0.06]">
+        <div className="max-w-6xl mx-auto">
+          <Reveal>
+            <p className="text-[11px] tracking-[0.3em] text-[#007BFF]/70 mb-4">THE ECOSYSTEM</p>
+            <h2 className="text-4xl lg:text-5xl font-light tracking-tight max-w-2xl">
+              Four hubs. One home, thinking as a whole.
+            </h2>
+          </Reveal>
+
+          <div className="mt-16 grid lg:grid-cols-2 gap-5">
+            {HUBS.map((hub, i) => {
+              const HubIcon = hub.icon;
+              const isActive = activeHub === i;
+              const accentColor = hub.accent === "blue" ? "#007BFF" : "#E65100";
+              return (
+                <Reveal key={hub.id} delay={i * 80}>
+                  <button
+                    onClick={() => setActiveHub(i)}
+                    className={`w-full text-left rounded-xl border p-8 transition-all duration-500 group ${
+                      isActive
+                        ? hub.accent === "blue"
+                          ? "border-[#007BFF]/50 glow-blue bg-white/[0.03]"
+                          : "border-[#E65100]/50 glow-orange bg-white/[0.03]"
+                        : "border-white/10 hover:border-white/25 bg-white/[0.015]"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-4">
+                        <div
+                          className="w-12 h-12 rounded-full flex items-center justify-center border transition-colors duration-500"
+                          style={{
+                            borderColor: isActive ? accentColor : "rgba(255,255,255,0.15)",
+                            color: isActive ? accentColor : "rgba(255,255,255,0.6)",
+                          }}
+                        >
+                          <HubIcon size={20} />
+                        </div>
+                        <div>
+                          <p className="text-[11px] tracking-[0.2em] text-white/30">{hub.index}</p>
+                          <h3 className="text-xl font-normal mt-0.5">{hub.label}</h3>
+                        </div>
+                      </div>
+                      <ChevronRight
+                        size={18}
+                        className={`mt-2 transition-transform duration-500 text-white/30 ${
+                          isActive ? "rotate-90" : "group-hover:translate-x-1"
+                        }`}
+                      />
+                    </div>
+
+                    <p className="mt-5 text-sm text-white/45 font-light max-w-md">{hub.blurb}</p>
+
+                    <div
+                      className={`grid grid-cols-2 gap-3 overflow-hidden transition-all duration-500 ${
+                        isActive ? "max-h-40 opacity-100 mt-6" : "max-h-0 opacity-0 mt-0"
+                      }`}
+                    >
+                      {hub.items.map((item) => {
+                        const ItemIcon = item.icon;
+                        return (
+                          <div
+                            key={item.name}
+                            className="flex items-center gap-2 text-[13px] text-white/60 border border-white/10 rounded-lg px-3 py-2.5"
+                          >
+                            <ItemIcon size={14} style={{ color: accentColor }} />
+                            <span>{item.name}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </button>
+                </Reveal>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================= HARDWARE VAULT ============================= */}
+      <section id="vault" className="px-6 lg:px-10 py-28 border-t border-white/[0.06] bg-white/[0.015]">
+        <div className="max-w-6xl mx-auto">
+          <Reveal>
+            <p className="text-[11px] tracking-[0.3em] text-[#E65100]/70 mb-4">THE HARDWARE VAULT</p>
+            <h2 className="text-4xl lg:text-5xl font-light tracking-tight max-w-2xl">
+              Engineering credentials, not just brand names.
+            </h2>
+          </Reveal>
+
+          <Reveal delay={120}>
+            <div className="mt-12 inline-flex border border-white/10 rounded-full p-1 bg-black/40">
+              <button
+                onClick={() => setVaultTab("wired")}
+                className={`px-6 py-2.5 rounded-full text-[12px] tracking-[0.15em] transition-all duration-300 ${
+                  vaultTab === "wired" ? "bg-[#007BFF] text-white" : "text-white/50 hover:text-white/80"
+                }`}
+              >
+                WIRED ARCHITECTURE
+              </button>
+              <button
+                onClick={() => setVaultTab("wireless")}
+                className={`px-6 py-2.5 rounded-full text-[12px] tracking-[0.15em] transition-all duration-300 ${
+                  vaultTab === "wireless" ? "bg-[#E65100] text-white" : "text-white/50 hover:text-white/80"
+                }`}
+              >
+                WIRELESS FREEDOM
+              </button>
+            </div>
+          </Reveal>
+
+          <div className="mt-10">
+            {vaultTab === "wired" ? (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                {WIRED_BRANDS.map((brand, i) => (
+                  <Reveal key={brand.name} delay={i * 60}>
+                    <div className="border border-white/10 hover:border-[#007BFF]/50 hover:glow-blue rounded-xl px-5 py-8 text-center transition-all duration-400 h-full flex flex-col items-center justify-center gap-2 bg-black/20">
+                      <p className="text-lg font-medium tracking-wide">{brand.name}</p>
+                      <p className="text-[11px] text-white/35 font-light">{brand.tag}</p>
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
+            ) : (
+              <div className="grid sm:grid-cols-2 gap-4 max-w-3xl">
+                {WIRELESS_BRANDS.map((brand, i) => (
+                  <Reveal key={brand.name} delay={i * 60}>
+                    <div className="border border-white/10 hover:border-[#E65100]/50 hover:glow-orange rounded-xl px-6 py-10 text-center transition-all duration-400 bg-black/20">
+                      <p className="text-xl font-medium tracking-wide">{brand.name}</p>
+                      <p className="text-[11px] text-white/35 font-light mt-1">{brand.tag}</p>
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================= INDUSTRIAL CORE ============================= */}
+      <section id="core" className="px-6 lg:px-10 py-28 border-t border-white/[0.06]">
+        <div className="max-w-6xl mx-auto">
+          <Reveal>
+            <p className="text-[11px] tracking-[0.3em] text-[#007BFF]/70 mb-4">INDUSTRIAL CORE</p>
+            <h2 className="text-4xl lg:text-5xl font-light tracking-tight max-w-2xl">
+              From factory floors to living rooms.
+            </h2>
+            <p className="mt-6 text-white/45 font-light max-w-2xl leading-relaxed">
+              15+ years spent making industrial automation efficient, resilient, and safe — that same
+              discipline now governs how your home manages light, energy, and access. Genesis brings
+              factory-grade reliability into spaces built for living, not manufacturing.
+            </p>
+          </Reveal>
+
+          <div className="mt-16 grid lg:grid-cols-2 gap-5">
+            <Reveal>
+              <div className="border border-white/10 rounded-2xl p-8 h-full">
+                <p className="text-[11px] tracking-[0.2em] text-white/35 mb-6">TRADITIONAL HOME · STRESS</p>
+                <ul className="space-y-4">
+                  {STRESS.map((s) => (
+                    <li key={s} className="flex items-start gap-3 text-sm text-white/50 font-light">
+                      <XCircle size={16} className="text-white/25 shrink-0 mt-0.5" />
+                      <span>{s}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Reveal>
+            <Reveal delay={120}>
+              <div className="border border-[#007BFF]/30 rounded-2xl p-8 h-full glow-blue">
+                <p className="text-[11px] tracking-[0.2em] text-[#007BFF]/70 mb-6">GENESIS SMART HOME · PEACE OF MIND</p>
+                <ul className="space-y-4">
+                  {PEACE.map((s) => (
+                    <li key={s} className="flex items-start gap-3 text-sm text-white/75 font-light">
+                      <CheckCircle2 size={16} className="text-[#007BFF] shrink-0 mt-0.5" />
+                      <span>{s}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Reveal>
+          </div>
+
+          <Reveal delay={200}>
+            <div className="mt-6 grid sm:grid-cols-2 gap-5">
+              <div className="border border-white/10 rounded-2xl p-8 flex items-start gap-4">
+                <div className="w-11 h-11 rounded-full border border-[#E65100]/40 flex items-center justify-center shrink-0">
+                  <HeartHandshake size={18} className="text-[#E65100]" />
+                </div>
+                <div>
+                  <p className="font-normal">Elderly & convalescent friendly</p>
+                  <p className="text-sm text-white/40 font-light mt-1.5 leading-relaxed">
+                    Voice, single-touch, and automatic scenes designed so ease of use never depends on ease of learning.
+                  </p>
+                </div>
+              </div>
+              <div className="border border-white/10 rounded-2xl p-8 flex items-start gap-4">
+                <div className="w-11 h-11 rounded-full border border-[#007BFF]/40 flex items-center justify-center shrink-0">
+                  <Baby size={18} className="text-[#007BFF]" />
+                </div>
+                <div>
+                  <p className="font-normal">Child-safe by design</p>
+                  <p className="text-sm text-white/40 font-light mt-1.5 leading-relaxed">
+                    Curtain motors, gate logic, and access control engineered with fail-safes for the smallest members of the house.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ============================= TRUST WALL ============================= */}
+      <section id="trust" className="py-28 border-t border-white/[0.06] bg-white/[0.015] overflow-hidden">
+        <div className="max-w-6xl mx-auto px-6 lg:px-10">
+          <Reveal>
+            <p className="text-[11px] tracking-[0.3em] text-[#E65100]/70 mb-4 text-center">WALL OF TRUST</p>
+            <h2 className="text-3xl lg:text-4xl font-light tracking-tight text-center">
+              Trusted by institutions that cannot afford failure.
+            </h2>
+          </Reveal>
+        </div>
+
+        <div className="mt-16 space-y-6">
+          <div className="flex overflow-hidden">
+            <div className="flex gap-4 animate-marquee-left shrink-0">
+              {[...TRUST_LOGOS, ...TRUST_LOGOS].map((name, i) => (
+                <div
+                  key={`${name}-${i}`}
+                  className="border border-white/10 rounded-full px-8 py-4 text-sm text-white/50 whitespace-nowrap tracking-wide"
+                >
+                  {name}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex overflow-hidden">
+            <div className="flex gap-4 animate-marquee-right shrink-0">
+              {[...TRUST_LOGOS.slice().reverse(), ...TRUST_LOGOS.slice().reverse()].map((name, i) => (
+                <div
+                  key={`${name}-r-${i}`}
+                  className="border border-white/10 rounded-full px-8 py-4 text-sm text-white/40 whitespace-nowrap tracking-wide"
+                >
+                  {name}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================= CONTACT / CONSULTATION ============================= */}
+      <section id="contact" className="px-6 lg:px-10 py-28 border-t border-white/[0.06]">
+        <div className="max-w-3xl mx-auto">
+          <Reveal>
+            <p className="text-[11px] tracking-[0.3em] text-[#007BFF]/70 mb-4 text-center">BEGIN A CONSULTATION</p>
+            <h2 className="text-4xl font-light tracking-tight text-center text-balance">
+              Tell us about the space. We'll design the intelligence.
+            </h2>
+          </Reveal>
+
+          <Reveal delay={120}>
+            <div className="mt-14 border border-white/10 rounded-2xl p-8 lg:p-10 bg-white/[0.02]">
+              {submitted ? (
+                <div className="text-center py-10">
+                  <CheckCircle2 size={40} className="text-[#007BFF] mx-auto mb-5" />
+                  <h3 className="text-2xl font-light">Consultation request received.</h3>
+                  <p className="text-white/45 font-light mt-3 max-w-md mx-auto">
+                    A Genesis design consultant will reach out to {form.name.split(" ")[0] || "you"} shortly to
+                    discuss the {form.propertyType.toLowerCase() || "space"} in {form.city || "your city"}.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setSubmitted(false);
+                      setStep(1);
+                      setForm({ propertyType: "", interest: "", name: "", phone: "", city: "" });
+                    }}
+                    className="mt-8 text-sm text-[#007BFF] hover:underline"
+                  >
+                    Submit another request
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {/* progress */}
+                  <div className="flex items-center gap-2 mb-10">
+                    {[1, 2, 3].map((s) => (
+                      <div key={s} className="flex-1 flex items-center gap-2">
+                        <div
+                          className={`w-7 h-7 rounded-full border flex items-center justify-center text-[11px] transition-colors duration-300 shrink-0 ${
+                            step >= s
+                              ? "border-[#007BFF] bg-[#007BFF]/10 text-[#007BFF]"
+                              : "border-white/15 text-white/30"
+                          }`}
+                        >
+                          {s}
+                        </div>
+                        {s < 3 && (
+                          <div className={`h-px flex-1 ${step > s ? "bg-[#007BFF]/50" : "bg-white/10"}`} />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {step === 1 && (
+                    <div>
+                      <p className="text-sm tracking-wide text-white/40 mb-6">STEP 1 — PROPERTY TYPE</p>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        {PROPERTY_TYPES.map((p) => {
+                          const PIcon = p.icon;
+                          const active = form.propertyType === p.label;
+                          return (
+                            <button
+                              key={p.label}
+                              onClick={() => setForm((f) => ({ ...f, propertyType: p.label }))}
+                              className={`flex items-center gap-3 rounded-xl border px-5 py-5 text-left transition-all duration-300 ${
+                                active
+                                  ? "border-[#007BFF]/60 glow-blue bg-[#007BFF]/5"
+                                  : "border-white/10 hover:border-white/25"
+                              }`}
+                            >
+                              <PIcon size={18} className={active ? "text-[#007BFF]" : "text-white/50"} />
+                              <span className="text-sm">{p.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <div className="mt-10 flex justify-end">
+                        <button
+                          disabled={!canAdvanceStep1}
+                          onClick={() => setStep(2)}
+                          className={`inline-flex items-center gap-2 rounded-full px-7 py-3 text-sm transition-all duration-300 ${
+                            canAdvanceStep1
+                              ? "bg-white text-[#0b0b0b] hover:bg-[#007BFF] hover:text-white"
+                              : "bg-white/10 text-white/30 cursor-not-allowed"
+                          }`}
+                        >
+                          Continue <ArrowRight size={15} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {step === 2 && (
+                    <div>
+                      <p className="text-sm tracking-wide text-white/40 mb-6">STEP 2 — KEY INTEREST</p>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        {INTERESTS.map((p) => {
+                          const PIcon = p.icon;
+                          const active = form.interest === p.label;
+                          return (
+                            <button
+                              key={p.label}
+                              onClick={() => setForm((f) => ({ ...f, interest: p.label }))}
+                              className={`flex items-center gap-3 rounded-xl border px-5 py-5 text-left transition-all duration-300 ${
+                                active
+                                  ? "border-[#E65100]/60 glow-orange bg-[#E65100]/5"
+                                  : "border-white/10 hover:border-white/25"
+                              }`}
+                            >
+                              <PIcon size={18} className={active ? "text-[#E65100]" : "text-white/50"} />
+                              <span className="text-sm">{p.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <div className="mt-10 flex justify-between">
+                        <button
+                          onClick={() => setStep(1)}
+                          className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm text-white/50 hover:text-white transition-colors"
+                        >
+                          <ChevronLeft size={15} /> Back
+                        </button>
+                        <button
+                          disabled={!canAdvanceStep2}
+                          onClick={() => setStep(3)}
+                          className={`inline-flex items-center gap-2 rounded-full px-7 py-3 text-sm transition-all duration-300 ${
+                            canAdvanceStep2
+                              ? "bg-white text-[#0b0b0b] hover:bg-[#007BFF] hover:text-white"
+                              : "bg-white/10 text-white/30 cursor-not-allowed"
+                          }`}
+                        >
+                          Continue <ArrowRight size={15} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {step === 3 && (
+                    <form onSubmit={handleSubmit}>
+                      <p className="text-sm tracking-wide text-white/40 mb-6">STEP 3 — YOUR DETAILS</p>
+                      <div className="space-y-4">
+                        <input
+                          type="text"
+                          placeholder="Full name"
+                          value={form.name}
+                          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                          className="w-full bg-transparent border border-white/15 focus:border-[#007BFF] rounded-lg px-5 py-3.5 text-sm outline-none transition-colors placeholder:text-white/25"
+                        />
+                        <input
+                          type="tel"
+                          placeholder="Phone number"
+                          value={form.phone}
+                          onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                          className="w-full bg-transparent border border-white/15 focus:border-[#007BFF] rounded-lg px-5 py-3.5 text-sm outline-none transition-colors placeholder:text-white/25"
+                        />
+                        <input
+                          type="text"
+                          placeholder="City / Location"
+                          value={form.city}
+                          onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
+                          className="w-full bg-transparent border border-white/15 focus:border-[#007BFF] rounded-lg px-5 py-3.5 text-sm outline-none transition-colors placeholder:text-white/25"
+                        />
+                      </div>
+                      <div className="mt-10 flex justify-between">
+                        <button
+                          type="button"
+                          onClick={() => setStep(2)}
+                          className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm text-white/50 hover:text-white transition-colors"
+                        >
+                          <ChevronLeft size={15} /> Back
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={!canSubmit}
+                          className={`inline-flex items-center gap-2 rounded-full px-7 py-3 text-sm transition-all duration-300 ${
+                            canSubmit
+                              ? "bg-[#007BFF] text-white hover:bg-[#007BFF]/90 glow-blue"
+                              : "bg-white/10 text-white/30 cursor-not-allowed"
+                          }`}
+                        >
+                          Submit Request <ArrowUpRight size={15} />
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </>
+              )}
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ============================= FOOTER ============================= */}
+      <footer className="border-t border-white/[0.06] px-6 lg:px-10 py-14">
+        <div className="max-w-6xl mx-auto grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
+          <div>
+            <div className="flex items-center gap-3">
+              <GenesisMark size={30} />
+              <div>
+                <p className="text-[12px] tracking-[0.25em]">GENESIS AUTOMATION</p>
+                <p className="text-[10px] tracking-[0.2em] text-white/35 mt-0.5">INSPIRING INNOVATIONS</p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <p className="text-[11px] tracking-[0.2em] text-white/35 mb-4">HEADQUARTERS</p>
+            <p className="text-sm text-white/55 font-light leading-relaxed flex items-start gap-2">
+              <MapPin size={15} className="shrink-0 mt-0.5 text-[#E65100]" />
+              67, K5, HIG, Kalinga Vihar, Bhubaneswar, Odisha-751019
+            </p>
+          </div>
+          <div>
+            <p className="text-[11px] tracking-[0.2em] text-white/35 mb-4">REACH US</p>
+            <div className="space-y-2.5 text-sm text-white/55 font-light">
+              <p className="flex items-center gap-2">
+                <Mail size={15} className="text-[#007BFF]" /> hello@genesisautomations.in
+              </p>
+              <p className="flex items-center gap-2">
+                <Globe size={15} className="text-[#007BFF]" /> www.genesisautomations.in
+              </p>
+              <p className="flex items-center gap-2">
+                <Phone size={15} className="text-[#E65100]" /> +91 70080 49055
+              </p>
+              <p className="flex items-center gap-2">
+                <Phone size={15} className="text-[#E65100]" /> +91 95577 44220
+              </p>
+            </div>
+          </div>
+          <div>
+            <p className="text-[11px] tracking-[0.2em] text-white/35 mb-4">NAVIGATE</p>
+            <div className="flex flex-col gap-2.5">
+              {NAV_LINKS.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    closeMenuAndScroll(link.href);
+                  }}
+                  className="text-sm text-white/55 font-light hover:text-white transition-colors"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="max-w-6xl mx-auto mt-12 pt-8 border-t border-white/[0.06] flex flex-col sm:flex-row justify-between gap-3 text-[11px] text-white/25 tracking-wide">
+          <p>© {new Date().getFullYear()} Genesis Automation. All rights reserved.</p>
+          <p>Industrial-grade engineering, for the home.</p>
+        </div>
+      </footer>
+    </div>
+  );
+}
